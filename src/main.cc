@@ -37,7 +37,9 @@ void TEST() {
   sgemm_jit_kernel_t mkl_sgemm = mkl_jit_get_sgemm_ptr(jitter);
 
   // rounds of warming up
-  mkl_sgemm(jitter, A, B, C);
+  for (index_t i = 0; i < 100000000; ++i) {
+    mkl_sgemm(jitter, A, B, C);
+  }
   // destroy jitter
   status = mkl_jit_destroy(jitter);
   if (MKL_JIT_ERROR == status) {
