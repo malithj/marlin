@@ -26,30 +26,8 @@ TEST(GEMM, CustomTest) {
     }
   }
 
-  std::chrono::steady_clock::time_point begin;
-  std::chrono::steady_clock::time_point end;
-  std::chrono::nanoseconds duration;
+  gemm.gemm('N', 'N', m, n, k, 1.0, A, k, B, n, 0, C, A_T, C_T);
 
-  for (index_t i = 0; i < 100; ++i) {
-    begin = std::chrono::steady_clock::now();
-    gemm.gemm('N', 'N', m, n, k, 1.0, A, k, B, n, 0, C, A_T, C_T);
-    end = std::chrono::steady_clock::now();
-    duration =
-        std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
-    std::cout << "duration: " << duration.count() << std::endl;
-  }
-  // for (index_t i = 0; i < m; ++i) {
-  //   for (index_t j = 0; j < k; ++j) {
-  //     std::cout << A_T[i * k + j] << " ";
-  //   }
-  //   std::cout << " " << std::endl;
-  // }
-  // for (index_t i = 0; i < m; ++i) {
-  //   for (index_t j = 0; j < n; ++j) {
-  //     std::cout << C[i * n + j] << " ";
-  //   }
-  //   std::cout << " " << std::endl;
-  // }
   std::free(A_T);
   std::free(C_T);
   EXPECT_EQ(1, 1);
