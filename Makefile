@@ -1,5 +1,5 @@
 CC=g++
-CFLAGS=-march=skylake-avx512 
+CFLAGS=-march=skylake-avx512 -g
 TEST_FLAGS=-Wall -ftest-coverage -fprofile-arcs -march=skylake-avx512 -g
 TARGET=main
 TEST_TARGET=test
@@ -12,6 +12,8 @@ GOOGLE_TEST=googletest
 RESULT_DIR=results
 MKL_LIB_DIR=${MKL_LIB}
 MKL_INC_DIR=${MKL_INC}
+VTUNE_LIB_DIR=${VTUNE_LIB}
+VTUNE_INC_DIR=${VTUNE_INC}
 LINE_COLOR=\033[0;33m
 CMD_COLOR=\033[1;32m
 RESET_COLOR=\033[0m
@@ -50,7 +52,7 @@ $(GOOGLE_TEST):
 $(MAIN): $(SRC_DIR)/main.cc
 	@echo "${LINE_COLOR}Building object file: $@${RESET_COLOR}"	
 	@echo -n "${CMD_COLOR}"
-	$(CC) -o $@ -c $^ $(CFLAGS) -I $(MKL_INC_DIR)
+	$(CC) -o $@ -c $^ $(CFLAGS) -I $(MKL_INC_DIR) -I $(VTUNE_INC_DIR)
 	@echo "${RESET_COLOR}"
 
 $(TEST): $(TEST_DIR)/main.cc
@@ -65,10 +67,10 @@ $(TEST_GEMM_CUSTOM): $(TEST_DIR)/gemm/test_gemm_custom.cc $(INCLUDE_DIR)/gemm/ge
 	$(CC) -o $@ -c $< $(CFLAGS) -I $(GOOGLE_TEST)/$(GOOGLE_TEST)/include -I $(INCLUDE_DIR)
 	@echo "${RESET_COLOR}"
 
-main: $(MAIN)
+main: $(MAIN) $(VTUNE_LIB_DIR)/libjitprofiling.a
 	@echo "${LINE_COLOR}Linking object file $@ with $^${RESET_COLOR}"
 	@echo -n "${CMD_COLOR}"
-	$(CC) -o $(BUILD_DIR)/$@ $^ $(CFLAGS) -I $(INCLUDE_DIR) -I $(MKL_INC_DIR) -Wl,--start-group $(MKL_LIB_DIR)/libmkl_intel_ilp64.a  $(MKL_LIB_DIR)/libmkl_sequential.a $(MKL_LIB_DIR)/libmkl_core.a -Wl,--end-group -lpthread -lm -ldl
+	$(CC) -o $(BUILD_DIR)/$@ $^  $(CFLAGS) -I $(INCLUDE_DIR) -I $(MKL_INC_DIR) -I $(VTUNE_INC_DIR) -Wl,--start-group $(MKL_LIB_DIR)/libmkl_intel_ilp64.a  $(MKL_LIB_DIR)/libmkl_sequential.a $(MKL_LIB_DIR)/libmkl_core.a -Wl,--end-group -lpthread -lm -ldl
 	@echo "${RESET_COLOR}"
 	@echo "${LINE_COLOR}BUILD SUCCESSFUL${RESET_COLOR}"
 

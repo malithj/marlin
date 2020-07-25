@@ -5,6 +5,10 @@
 #include <iostream>
 #include <memory>
 
+#ifdef ENABLE_JIT_PROFILE
+#include "jitprofiling.h"
+#endif
+
 typedef uint64_t index_t;
 
 void TEST() {
@@ -39,10 +43,19 @@ void TEST() {
     throw std::runtime_error(
         "insufficient memory to JIT and store the SGEMM kernel");
   }
-  sgemm_jit_kernel_t mkl_sgemm = mkl_jit_get_sgemm_ptr(jitter);
 
+#ifdef ENABLE_JIT_PROFILE
+  std::string name = "mkl_sgemm";
+  iJIT_Method_Load ml;
+  ml.method_id = iJIT_GetNewMethodID();
+  ml.method_name = (char *)name.c_str();
+  ml.method_load_address = reinterpret_cast<void *>(jitter);
+  iJIT_NotifyEvent(iJVM_EVENT_TYPE_METHOD_LOAD_FINISHED, &ml);
+#endif
+
+  sgemm_jit_kernel_t mkl_sgemm = mkl_jit_get_sgemm_ptr(jitter);
   // rounds of warming up
-  for (index_t i = 0; i < 100; ++i) {
+  for (index_t i = 0; i < 10; ++i) {
     begin = std::chrono::steady_clock::now();
     mkl_sgemm(jitter, A, B, C);
     end = std::chrono::steady_clock::now();
