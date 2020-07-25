@@ -43,11 +43,11 @@ template <typename T>
 index_t GEMM<T>::gemm(char transa, char transb, index_t m, index_t n, index_t k,
                       T alpha, T* a, index_t lda, T* b, index_t ldb, T beta,
                       T* c, T* a_t, T* c_t) {
-  // for (index_t h = 0; h < k; ++h) {
-  //   for (index_t w = 0; w < m; ++w) {
-  //     a_t[h * m + w] = a[w * k + h];
-  //   }
-  // }
+  for (index_t h = 0; h < k; ++h) {
+    for (index_t w = 0; w < m; ++w) {
+      a_t[h * m + w] = a[w * k + h];
+    }
+  }
   memset(c_t, 0, m * n * sizeof(T));
 
   for (index_t j = 0; j < m; j += 2) {
@@ -117,11 +117,11 @@ index_t GEMM<T>::gemm(char transa, char transb, index_t m, index_t n, index_t k,
     _mm512_mask_storeu_ps(c_ptr, mask, czmm30);
     _mm512_mask_storeu_ps(c_ptr + m, mask, czmm31);
   }
-  // for (index_t h = 0; h < m; ++h) {
-  //   for (index_t w = 0; w < n; ++w) {
-  //     c[h * n + w] = c_t[w * m + h];
-  //   }
-  // }
+  for (index_t h = 0; h < m; ++h) {
+    for (index_t w = 0; w < n; ++w) {
+      c[h * n + w] = c_t[w * m + h];
+    }
+  }
 }
 
 #endif
