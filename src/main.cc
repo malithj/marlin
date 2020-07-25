@@ -26,9 +26,18 @@ void TEST() {
   float *A = static_cast<float *>(std::malloc(m * k * sizeof(float)));
   float *B = static_cast<float *>(std::malloc(k * n * sizeof(float)));
   float *C = static_cast<float *>(std::malloc(m * n * sizeof(float)));
-  // set warm up matrices to zero
-  std::memset(A, 0, m * k * sizeof(float));
-  std::memset(B, 0, k * n * sizeof(float));
+  // set warm up matrices
+  for (index_t i = 0; i < m; ++i) {
+    for (index_t j = 0; j < k; ++j) {
+      A[i * k + j] = i * k + j + 1;
+    }
+  }
+  for (index_t i = 0; i < k; ++i) {
+    for (index_t j = 0; j < n; ++j) {
+      index_t idx = i * n + j;
+      B[i * n + j] = idx + 1;
+    }
+  }
   std::memset(C, 0, m * n * sizeof(float));
 
   std::chrono::steady_clock::time_point begin;
