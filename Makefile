@@ -21,12 +21,14 @@ RESET_COLOR=\033[0m
 # object file names
 ODIR=$(BUILD_DIR)/bin
 MAIN_O=main.o
+ASM_GEMM_O=asm_gemm.o
 TEST_O=test.o
 TEST_GEMM_CUSTOM_O=test_gemm_custom.o
 TEST_GEMM_O=test_gemm.o
 
 # create object files in binary directory
 MAIN=$(patsubst %,$(ODIR)/%,$(MAIN_O))
+ASM_GEMM=$(patsubst %,$(ODIR)/%,$(ASM_GEMM_O))
 TEST=$(patsubst %,$(ODIR)/%,$(TEST_O))
 TEST_GEMM_CUSTOM=$(patsubst %,$(ODIR)/%,$(TEST_GEMM_CUSTOM_O))
 TEST_GEMM=$(patsubst %,$(ODIR)/%,$(TEST_GEMM_O))
@@ -49,6 +51,12 @@ $(GOOGLE_TEST):
 	@echo "${LINE_COLOR}Building object file: $@${RESET_COLOR}"
 	@echo -n "${CMD_COLOR}"
 	@cd $(BUILD_DIR)/$(GOOGLE_TEST) && cmake ../../$(GOOGLE_TEST) && make
+	@echo "${RESET_COLOR}"
+
+$(ASM_GEMM): $(SRC_DIR)/asm/gemm.s
+	@echo "${LINE_COLOR}Building object file: $@${RESET_COLOR}"
+	@echo -n "${CMD_COLOR}"
+	$(CC) -o $@ -c $^
 	@echo "${RESET_COLOR}"
 
 $(MAIN): $(SRC_DIR)/main.cc
@@ -82,7 +90,7 @@ main: $(MAIN) $(VTUNE_LIB_DIR)/libjitprofiling.a
 	@echo "${RESET_COLOR}"
 	@echo "${LINE_COLOR}BUILD SUCCESSFUL${RESET_COLOR}"
 
-test: $(TEST) $(TEST_GEMM) $(TEST_GEMM_CUSTOM) $(BUILD_DIR)/$(GOOGLE_TEST)/lib/libgtest.a
+test: $(TEST) $(ASM_GEMM) $(TEST_GEMM) $(TEST_GEMM_CUSTOM) $(BUILD_DIR)/$(GOOGLE_TEST)/lib/libgtest.a
 	@echo "${LINE_COLOR}Linking object file $@ with $^${RESET_COLOR}"
 	@echo -n "${CMD_COLOR}"
 	$(CC) -o $(BUILD_DIR)/$@ $^ $(CFLAGS) -I $(INCLUDE_DIR) -I $(GOOGLE_TEST)/$(GOOGLE_TEST)/include -lpthread 

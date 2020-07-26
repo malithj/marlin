@@ -3,6 +3,9 @@
 #include "gemm/gemm.h"
 #include "gtest/gtest.h"
 
+extern "C" float asm_gemm(float *A, float *B, float *C, index_t m, index_t n,
+                          index_t k);
+
 TEST(GEMM, CPP) {
   index_t m = 10;
   index_t n = 10;
@@ -45,4 +48,31 @@ TEST(GEMM, CPP) {
   std::free(A);
   std::free(B);
   std::free(C);
+}
+
+TEST(GEMM, ASM) {
+  index_t m = 10;
+  index_t n = 10;
+  index_t k = 10;
+
+  float *A = static_cast<float *>(std::malloc(m * k * sizeof(float)));
+  float *B = static_cast<float *>(std::malloc(n * k * sizeof(float)));
+  float *C = static_cast<float *>(std::malloc(m * n * sizeof(float)));
+
+  for (index_t i = 0; i < m; ++i) {
+    for (index_t j = 0; j < k; ++j) {
+      index_t idx = i * n + j;
+      A[i * k + j] = static_cast<float>(idx + 1);
+    }
+  }
+  for (index_t i = 0; i < k; ++i) {
+    for (index_t j = 0; j < n; ++j) {
+      float idx = i * n + j;
+      B[i * n + j] = static_cast<float>(idx + 1);
+    }
+  }
+
+  std::cout << A[0] << std::endl;
+  float a = asm_gemm(A, B, C, m, n, k);
+  std::cout << a << std::endl;
 }
