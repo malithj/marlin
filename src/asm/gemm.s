@@ -28,21 +28,23 @@ asm_gemm:
     pushq %rbp              
     movq %rsp, %rbp
     # FUNC START
-    # movq (%rdi), %rax              # A
-    # movq (%rsi), %rax              # B
-    # movq (%rdx), %rax              # C
-    # movq (%rcx), %rax              # A_T
-    # movq (%r8), %rax               # C_T
-    # movq %r9, %rax                  # M
-    # movq 0x10(%rbp), %rax           # N
-    # movq 0x18(%rbp), %rax           # K
+   # movq (%rdi), %rax              # A
+   # movq (%rsi), %rax              # B
+   # movq (%rdx), %rax              # C
+   # movq (%rcx), %rax              # A_T
+   # movq (%r8), %rax               # C_T
+    movq %r9, %rax                  # M
+    movq 0x10(%rbp), %rax           # N
+    movq 0x18(%rbp), %rax           # K
     # ALLOCATE STACK SPACE
-    # subq $64, %rsp
+    subq $64, %rsp
     # MOVE TO TEMP REGISTERS
     movq %rdi, %r10
     movq %rsi, %r11
+    xorl %r12d, %r12d
     # START MAT TRANSPOSE
     xorl %eax, %eax                 # i
+    xorl %ebx, %ebx 
 .LPTPOSE_OUTER:
     cmpl %r9d, %eax                 # i < M
     jnb .EXITMAIN
@@ -52,16 +54,16 @@ asm_gemm:
     jnb .LPTPOSE_INNER_END
     # INDEX COMPUTATION
     movl %eax, %edi
-    movl %ebx, %esi  
-    imul 0x18(%rbp), %edi           # i * k 
-    imul %r9d, %esi                 # j * m 
+    imul 0x18(%rbp), %edi           # i * k  
     addl %ebx, %edi                 # i * k + j
-    addl %eax, %esi                 # j * m + i
     leaq (%r10, %rdi, 0x4), %rdi    # 4 BYTE ALIGNED
-    movq (%rdi), %rdi                
+    movq (%rdi), %rdi
+    movl %ebx, %esi                         
+    imul %r9d, %esi                 # j * m
+    addl %eax, %esi                 # j * m + i
     leaq (%rcx, %rsi, 0x4), %rsi    # 4 BYTE ALIGNED
     # STORE
-    movq %rdi, (%rsi)
+    movl %edi, (%rsi)
     addl $1, %ebx
     jmp .LPTPOSE_INNER
 .LPTPOSE_INNER_END:
@@ -69,10 +71,10 @@ asm_gemm:
     jmp .LPTPOSE_OUTER
 .EXITMAIN:
     # DEALLOCATE STACK SPACE
-    # addq $64, %rsp
+    addq $64, %rsp
     # FUNCTION EPILOG BEGINS HERE
     movq %rbp, %rsp        
     pop %rbp
-    # movss (%rdi), %xmm0     # RETURN VALUE
+    movq %r12, %rax
     ret
 

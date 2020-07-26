@@ -51,9 +51,9 @@ TEST(GEMM, CPP) {
 }
 
 TEST(GEMM, ASM) {
-  index_t m = 5;
-  index_t n = 5;
-  index_t k = 5;
+  index_t m = 10;
+  index_t n = 10;
+  index_t k = 10;
 
   std::chrono::steady_clock::time_point begin;
   std::chrono::steady_clock::time_point end;
@@ -79,7 +79,7 @@ TEST(GEMM, ASM) {
   }
   memset(A_T, 0, sizeof(float) * m * k);
 
-  for (index_t i = 0; i < 5; ++i) {
+  for (index_t i = 0; i < 10; ++i) {
     begin = std::chrono::steady_clock::now();
     asm_gemm(A, B, C, A_T, C_T, m, n, k);
     end = std::chrono::steady_clock::now();
@@ -87,22 +87,6 @@ TEST(GEMM, ASM) {
         std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
     std::cout << "duration: " << duration.count() << std::endl;
   }
-
-  //   for (index_t i = 0; i < m; ++i) {
-  //     for (index_t j = 0; j < k; ++j) {
-  //       index_t idx = i * k + j;
-  //       std::cout << A[idx] << " ";
-  //     }
-  //     std::cout << " " << std::endl;
-  //   }
-
-  //   for (index_t i = 0; i < k; ++i) {
-  //     for (index_t j = 0; j < m; ++j) {
-  //       index_t idx = i * m + j;
-  //       std::cout << A_T[idx] << " ";
-  //     }
-  //     std::cout << " " << std::endl;
-  //   }
 
   std::free(A);
   std::free(B);
