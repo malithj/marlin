@@ -79,14 +79,7 @@ TEST(GEMM, ASM) {
   }
   memset(A_T, 0, sizeof(float) * m * k);
 
-  for (index_t i = 0; i < 10; ++i) {
-    begin = std::chrono::steady_clock::now();
-    asm_gemm(A, B, C, A_T, C_T, m, n, k);
-    end = std::chrono::steady_clock::now();
-    duration =
-        std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
-    std::cout << "duration: " << duration.count() << std::endl;
-  }
+  asm_gemm(A, B, C, A_T, C_T, m, n, k);
 
   std::free(A);
   std::free(B);
