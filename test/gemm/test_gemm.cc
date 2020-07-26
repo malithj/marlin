@@ -3,8 +3,8 @@
 #include "gemm/gemm.h"
 #include "gtest/gtest.h"
 
-extern "C" float asm_gemm(float *A, float *B, float *C, index_t m, index_t n,
-                          index_t k);
+extern "C" index_t asm_gemm(float *A, float *B, float *C, float *A_T,
+                            float *C_T, index_t m, index_t n, index_t k);
 
 TEST(GEMM, CPP) {
   index_t m = 10;
@@ -51,17 +51,23 @@ TEST(GEMM, CPP) {
 }
 
 TEST(GEMM, ASM) {
-  index_t m = 10;
-  index_t n = 10;
-  index_t k = 10;
+  index_t m = 5;
+  index_t n = 5;
+  index_t k = 5;
+
+  std::chrono::steady_clock::time_point begin;
+  std::chrono::steady_clock::time_point end;
+  std::chrono::nanoseconds duration;
 
   float *A = static_cast<float *>(std::malloc(m * k * sizeof(float)));
   float *B = static_cast<float *>(std::malloc(n * k * sizeof(float)));
   float *C = static_cast<float *>(std::malloc(m * n * sizeof(float)));
+  float *A_T = static_cast<float *>(std::malloc(m * k * sizeof(float)));
+  float *C_T = static_cast<float *>(std::malloc(m * n * sizeof(float)));
 
   for (index_t i = 0; i < m; ++i) {
     for (index_t j = 0; j < k; ++j) {
-      index_t idx = i * n + j;
+      index_t idx = i * k + j;
       A[i * k + j] = static_cast<float>(idx + 1);
     }
   }
@@ -71,8 +77,36 @@ TEST(GEMM, ASM) {
       B[i * n + j] = static_cast<float>(idx + 1);
     }
   }
+  memset(A_T, 0, sizeof(float) * m * k);
 
-  std::cout << A[0] << std::endl;
-  float a = asm_gemm(A, B, C, m, n, k);
-  std::cout << a << std::endl;
+  for (index_t i = 0; i < 5; ++i) {
+    begin = std::chrono::steady_clock::now();
+    asm_gemm(A, B, C, A_T, C_T, m, n, k);
+    end = std::chrono::steady_clock::now();
+    duration =
+        std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
+    std::cout << "duration: " << duration.count() << std::endl;
+  }
+
+  //   for (index_t i = 0; i < m; ++i) {
+  //     for (index_t j = 0; j < k; ++j) {
+  //       index_t idx = i * k + j;
+  //       std::cout << A[idx] << " ";
+  //     }
+  //     std::cout << " " << std::endl;
+  //   }
+
+  //   for (index_t i = 0; i < k; ++i) {
+  //     for (index_t j = 0; j < m; ++j) {
+  //       index_t idx = i * m + j;
+  //       std::cout << A_T[idx] << " ";
+  //     }
+  //     std::cout << " " << std::endl;
+  //   }
+
+  std::free(A);
+  std::free(B);
+  std::free(C);
+  std::free(A_T);
+  std::free(C_T);
 }
