@@ -101,11 +101,6 @@ index_t GEMM<T>::gemm(char transa, char transb, index_t m, index_t n, index_t k,
     czmm23 = _mm512_fmadd_ps(azmm0, bzmm8, czmm23);
     czmm24 = _mm512_fmadd_ps(azmm0, bzmm9, czmm24);
     czmm25 = _mm512_fmadd_ps(azmm0, bzmm10, czmm25);
-    // czmm26 = _mm512_fmadd_ps(azmm0, bzmm11, czmm26);
-    // czmm27 = _mm512_fmadd_ps(azmm0, bzmm12, czmm27);
-    // czmm28 = _mm512_fmadd_ps(azmm0, bzmm13, czmm28);
-    // czmm29 = _mm512_fmadd_ps(azmm0, bzmm14, czmm29);
-    // czmm30 = _mm512_fmadd_ps(azmm0, bzmm15, czmm30);
   }
 
   c_ptr = c;
