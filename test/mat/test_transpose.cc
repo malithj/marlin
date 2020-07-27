@@ -1,0 +1,37 @@
+#include <immintrin.h>
+
+#include <chrono>
+
+#include "constants/constants.h"
+#include "gtest/gtest.h"
+#include "mat/transpose.h"
+
+TEST(Matrix, Transpose_4x4) {
+  index_t h = 10;
+  index_t w = 10;
+
+  std::chrono::steady_clock::time_point begin;
+  std::chrono::steady_clock::time_point end;
+  std::chrono::nanoseconds duration;
+
+  float *mat_4x4 =
+      static_cast<float *>(_mm_malloc(h * w * sizeof(float), ALIGN_BYTE_SIZE));
+  float *mat_4x4_tp =
+      static_cast<float *>(_mm_malloc(h * w * sizeof(float), ALIGN_BYTE_SIZE));
+
+  for (index_t i = 0; i < 16; ++i) {
+    mat_4x4[i] = i;
+  }
+
+  for (index_t i = 0; i < 5; ++i) {
+    begin = std::chrono::steady_clock::now();
+    transpose4x4<float>(mat_4x4, mat_4x4_tp, h, w);
+    end = std::chrono::steady_clock::now();
+    duration =
+        std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
+    std::cout << "duration: " << duration.count() << std::endl;
+  }
+
+  _mm_free(mat_4x4);
+  _mm_free(mat_4x4_tp);
+}
