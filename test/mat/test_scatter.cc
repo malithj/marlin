@@ -32,10 +32,6 @@ TEST(Matrix, Scatter) {
     begin = std::chrono::steady_clock::now();
     float *a_ptr = A;
     _mm512_mask_i32scatter_ps(a_ptr, mask, zmm0, zmm1, 0x4);
-    a_ptr = A + 1;
-    __m512 zmm3 = _mm512_mask_i32gather_ps(zmm1, mask, zmm0, a_ptr, 0x4);
-    a_ptr = A + 2;
-    __m512 zmm4 = _mm512_mask_i32gather_ps(zmm1, mask, zmm0, a_ptr, 0x4);
     end = std::chrono::steady_clock::now();
     duration =
         std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
