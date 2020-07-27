@@ -19,24 +19,19 @@ void TEST() {
   index_t m, n, k;
 
   // warm up libraries
-  m = 10;
-  n = 10;
-  k = 10;
+  m = 4;
+  n = 4;
+  k = 4;
   // define warm up matrices
   float *A = static_cast<float *>(std::malloc(m * k * sizeof(float)));
   float *B = static_cast<float *>(std::malloc(k * n * sizeof(float)));
   float *C = static_cast<float *>(std::malloc(m * n * sizeof(float)));
   // set warm up matrices
-  for (index_t i = 0; i < m; ++i) {
-    for (index_t j = 0; j < k; ++j) {
-      A[i * k + j] = i * k + j + 1;
-    }
+  for (index_t i = 0; i < m * k; ++i) {
+    A[i] = i;
   }
-  for (index_t i = 0; i < k; ++i) {
-    for (index_t j = 0; j < n; ++j) {
-      index_t idx = i * n + j;
-      B[i * n + j] = idx + 1;
-    }
+  for (index_t i = 0; i < k * n; ++i) {
+    B[i] = i;
   }
   std::memset(C, 0, m * n * sizeof(float));
 
