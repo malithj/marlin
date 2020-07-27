@@ -3,6 +3,6 @@
 
 #include "../types/types.h"
 
-index_t ALIGN_BYTE_SIZE = 64;
+const index_t ALIGN_BYTE_SIZE = 64;
 
 #endif
