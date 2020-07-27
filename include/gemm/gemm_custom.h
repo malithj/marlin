@@ -51,22 +51,28 @@ index_t GEMM<T>::gemm(char transa, char transb, index_t m, index_t n, index_t k,
 
   // load 15 C columns
   uint16_t mask = ~(0xffff << m);
+
   T* c_ptr = c;
-  __m512 czmm16 = _mm512_maskz_loadu_ps(mask, c_ptr);
-  __m512 czmm17 = _mm512_maskz_loadu_ps(mask, c_ptr + m);
-  __m512 czmm18 = _mm512_maskz_loadu_ps(mask, c_ptr + 2 * m);
-  __m512 czmm19 = _mm512_maskz_loadu_ps(mask, c_ptr + 3 * m);
-  __m512 czmm20 = _mm512_maskz_loadu_ps(mask, c_ptr + 4 * m);
-  __m512 czmm21 = _mm512_maskz_loadu_ps(mask, c_ptr + 5 * m);
-  __m512 czmm22 = _mm512_maskz_loadu_ps(mask, c_ptr + 6 * m);
-  __m512 czmm23 = _mm512_maskz_loadu_ps(mask, c_ptr + 7 * m);
-  __m512 czmm24 = _mm512_maskz_loadu_ps(mask, c_ptr + 8 * m);
-  __m512 czmm25 = _mm512_maskz_loadu_ps(mask, c_ptr + 9 * m);
-  // __m512 czmm26 = _mm512_maskz_loadu_ps(mask, c_ptr);
-  // __m512 czmm27 = _mm512_maskz_loadu_ps(mask, c_ptr);
-  // __m512 czmm28 = _mm512_maskz_loadu_ps(mask, c_ptr);
-  // __m512 czmm29 = _mm512_maskz_loadu_ps(mask, c_ptr);
-  // __m512 czmm30 = _mm512_maskz_loadu_ps(mask, c_ptr);
+  __m512 czmm16 = _mm512_mask_i32gather_ps(zmm0, mask, zmm1, c_ptr, 0x4);
+  c_ptr++;
+  __m512 czmm17 = _mm512_mask_i32gather_ps(zmm0, mask, zmm1, c_ptr, 0x4);
+  c_ptr++;
+  __m512 czmm18 = _mm512_mask_i32gather_ps(zmm0, mask, zmm1, c_ptr, 0x4);
+  c_ptr++;
+  __m512 czmm19 = _mm512_mask_i32gather_ps(zmm0, mask, zmm1, c_ptr, 0x4);
+  c_ptr++;
+  __m512 czmm20 = _mm512_mask_i32gather_ps(zmm0, mask, zmm1, c_ptr, 0x4);
+  c_ptr++;
+  __m512 czmm21 = _mm512_mask_i32gather_ps(zmm0, mask, zmm1, c_ptr, 0x4);
+  c_ptr++;
+  __m512 czmm22 = _mm512_mask_i32gather_ps(zmm0, mask, zmm1, c_ptr, 0x4);
+  c_ptr++;
+  __m512 czmm23 = _mm512_mask_i32gather_ps(zmm0, mask, zmm1, c_ptr, 0x4);
+  c_ptr++;
+  __m512 czmm24 = _mm512_mask_i32gather_ps(zmm0, mask, zmm1, c_ptr, 0x4);
+  c_ptr++;
+  __m512 czmm25 = _mm512_mask_i32gather_ps(zmm0, mask, zmm1, c_ptr, 0x4);
+
   __m512 azmm0;
   for (index_t kk = 0; kk < k; kk += 1) {
     float* a_ptr = a + kk;
@@ -102,6 +108,7 @@ index_t GEMM<T>::gemm(char transa, char transb, index_t m, index_t n, index_t k,
     // czmm30 = _mm512_fmadd_ps(azmm0, bzmm15, czmm30);
   }
 
+  c_ptr = c;
   _mm512_mask_i32scatter_ps(c_ptr, mask, zmm1, czmm16, 0x4);
   c_ptr++;
   _mm512_mask_i32scatter_ps(c_ptr, mask, zmm1, czmm17, 0x4);
