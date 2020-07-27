@@ -12,8 +12,10 @@ TEST(GEMM, CustomTest) {
   float *A = static_cast<float *>(std::malloc(m * k * sizeof(float)));
   float *B = static_cast<float *>(std::malloc(n * k * sizeof(float)));
   float *C = static_cast<float *>(std::malloc(m * n * sizeof(float)));
-  float *A_T = static_cast<float *>(std::malloc(m * k * sizeof(float)));
-  float *C_T = static_cast<float *>(std::malloc(m * n * sizeof(float)));
+
+  std::chrono::steady_clock::time_point begin;
+  std::chrono::steady_clock::time_point end;
+  std::chrono::nanoseconds duration;
 
   float C_REF[100] = {
       3355,  3410,  3465,  3520,  3575,  3630,  3685,  3740,  3795,  3850,
@@ -39,7 +41,15 @@ TEST(GEMM, CustomTest) {
     }
   }
 
-  gemm.gemm('N', 'N', m, n, k, 1.0, A, k, B, n, 0, C, A_T, C_T);
+  for (index_t i = 0; i < 100; ++i) {
+    memset(C, 0, m * n * sizeof(float));
+    begin = std::chrono::steady_clock::now();
+    gemm.gemm('N', 'N', m, n, k, 1.0, A, k, B, n, 0, C);
+    end = std::chrono::steady_clock::now();
+    duration =
+        std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
+    std::cout << "duration: " << duration.count() << std::endl;
+  }
 
   for (index_t i = 0; i < m * n; ++i) {
     EXPECT_EQ(C_REF[i], C[i]);
@@ -48,6 +58,4 @@ TEST(GEMM, CustomTest) {
   std::free(A);
   std::free(B);
   std::free(C);
-  std::free(A_T);
-  std::free(C_T);
 }
