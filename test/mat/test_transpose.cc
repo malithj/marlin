@@ -23,15 +23,7 @@ TEST(Matrix, Transpose_4x4) {
     mat_4x4[i] = i;
   }
 
-  for (index_t i = 0; i < 5; ++i) {
-    begin = std::chrono::steady_clock::now();
-    transpose4x4<float>(mat_4x4, mat_4x4_tp, h, w);
-    end = std::chrono::steady_clock::now();
-    duration =
-        std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
-    std::cout << "duration: " << duration.count() << std::endl;
-  }
-
+  transpose4x4<float>(mat_4x4, mat_4x4_tp, h, w);
   _mm_free(mat_4x4);
   _mm_free(mat_4x4_tp);
 }
