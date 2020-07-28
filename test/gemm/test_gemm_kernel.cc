@@ -47,15 +47,7 @@ TEST(GEMM, f32_j10) {
     end = std::chrono::steady_clock::now();
     duration =
         std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
-    std::cout << "duration: " << duration.count() << std::endl;
   }
-
-  // for (index_t i = 0; i < m; ++i) {
-  //   for (index_t j = 0; j < n; ++j) {
-  //     std::cout << C[i * n + j] << " ";
-  //   }
-  //   std::cout << "" << std::endl;
-  // }
 
   for (index_t i = 0; i < m * n; ++i) {
     EXPECT_EQ(C_REF[i], C[i]);
