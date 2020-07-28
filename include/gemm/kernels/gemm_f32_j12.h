@@ -14,12 +14,12 @@ inline index_t gemm_f32_j12(char transa, char transb, index_t m, index_t n,
                             index_t ldc) {
   uint32_t arr_a[16];
   for (uint32_t i = 0; i < 16; ++i) {
-    arr_a[i] = i * k;
+    arr_a[i] = i * lda;
   }
 
   uint32_t arr_c[16];
   for (uint32_t i = 0; i < 16; ++i) {
-    arr_c[i] = i * n;
+    arr_c[i] = i * ldc;
   }
   __m512 zmm0 = _mm512_setzero_ps();
   __m512i zmm1 = _mm512_loadu_si512(&arr_c);
@@ -58,7 +58,7 @@ inline index_t gemm_f32_j12(char transa, char transb, index_t m, index_t n,
     __m512 azmm0 = _mm512_mask_i32gather_ps(zmm0, mask, zmm1, a_ptr, 0x4);
 
     // load n B columns
-    float* b_ptr = b + kk * n;
+    float* b_ptr = b + kk * ldb;
     __m512 bzmm1 = _mm512_set1_ps(*b_ptr);
     __m512 bzmm2 = _mm512_set1_ps(*(b_ptr + 1));
     __m512 bzmm3 = _mm512_set1_ps(*(b_ptr + 2));
