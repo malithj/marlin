@@ -48,7 +48,6 @@ TEST(GEMM, CustomTest) {
     end = std::chrono::steady_clock::now();
     duration =
         std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
-    std::cout << "duration: " << duration.count() << std::endl;
   }
 
   for (index_t i = 0; i < m * n; ++i) {
