@@ -85,7 +85,7 @@ $(TEST_GEMM_CUSTOM): $(TEST_DIR)/gemm/test_gemm_custom.cc $(INCLUDE_DIR)/gemm/ge
 	$(CC) -o $@ -c $< $(CFLAGS) -I $(GOOGLE_TEST)/$(GOOGLE_TEST)/include -I $(INCLUDE_DIR)
 	@echo "${RESET_COLOR}"
 
-$(TEST_GEMM_KERNEL): $(TEST_DIR)/gemm/test_gemm_kernel.cc $(INCLUDE_DIR)/gemm/kernels/gemm_f32_j10.h $(INCLUDE_DIR)/gemm/kernels/gemm_f32_j11.h $(INCLUDE_DIR)/gemm/kernels/gemm_f32_j12.h
+$(TEST_GEMM_KERNEL): $(TEST_DIR)/gemm/test_gemm_kernel.cc $(INCLUDE_DIR)/gemm/kernels/*.h
 	@echo "${LINE_COLOR}Building object file: $@${RESET_COLOR}"	
 	@echo -n "${CMD_COLOR}"
 	$(CC) -o $@ -c $< $(CFLAGS) -I $(GOOGLE_TEST)/$(GOOGLE_TEST)/include -I $(INCLUDE_DIR)

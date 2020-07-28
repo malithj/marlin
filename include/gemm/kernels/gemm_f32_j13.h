@@ -1,5 +1,5 @@
-#ifndef __GEMM_F32_J11_H_
-#define __GEMM_F32_J11_H_
+#ifndef __GEMM_F32_J13_H_
+#define __GEMM_F32_J13_H_
 
 #include <immintrin.h>
 #include <memory.h>
@@ -8,7 +8,7 @@
 
 #include "../../types/types.h"
 
-index_t gemm_f32_j11(char transa, char transb, index_t m, index_t n, index_t k,
+index_t gemm_f32_j13(char transa, char transb, index_t m, index_t n, index_t k,
                      float alpha, float* a, index_t lda, float* b, index_t ldb,
                      float beta, float* c, index_t ldc) {
   uint32_t arr_a[16];
@@ -48,6 +48,10 @@ index_t gemm_f32_j11(char transa, char transb, index_t m, index_t n, index_t k,
   __m512 czmm25 = _mm512_mask_i32gather_ps(zmm0, mask, zmm1, c_ptr, 0x4);
   c_ptr++;
   __m512 czmm26 = _mm512_mask_i32gather_ps(zmm0, mask, zmm1, c_ptr, 0x4);
+  c_ptr++;
+  __m512 czmm27 = _mm512_mask_i32gather_ps(zmm0, mask, zmm1, c_ptr, 0x4);
+  c_ptr++;
+  __m512 czmm28 = _mm512_mask_i32gather_ps(zmm0, mask, zmm1, c_ptr, 0x4);
 
   zmm1 = _mm512_loadu_si512(&arr_a);
   for (index_t kk = 0; kk < k; kk += 1) {
@@ -67,6 +71,8 @@ index_t gemm_f32_j11(char transa, char transb, index_t m, index_t n, index_t k,
     __m512 bzmm9 = _mm512_set1_ps(*(b_ptr + 8));
     __m512 bzmm10 = _mm512_set1_ps(*(b_ptr + 9));
     __m512 bzmm11 = _mm512_set1_ps(*(b_ptr + 10));
+    __m512 bzmm12 = _mm512_set1_ps(*(b_ptr + 11));
+    __m512 bzmm13 = _mm512_set1_ps(*(b_ptr + 12));
 
     czmm16 = _mm512_fmadd_ps(azmm0, bzmm1, czmm16);
     czmm17 = _mm512_fmadd_ps(azmm0, bzmm2, czmm17);
@@ -79,6 +85,8 @@ index_t gemm_f32_j11(char transa, char transb, index_t m, index_t n, index_t k,
     czmm24 = _mm512_fmadd_ps(azmm0, bzmm9, czmm24);
     czmm25 = _mm512_fmadd_ps(azmm0, bzmm10, czmm25);
     czmm26 = _mm512_fmadd_ps(azmm0, bzmm11, czmm26);
+    czmm27 = _mm512_fmadd_ps(azmm0, bzmm12, czmm27);
+    czmm28 = _mm512_fmadd_ps(azmm0, bzmm13, czmm28);
   }
 
   zmm1 = _mm512_loadu_si512(&arr_c);
@@ -105,6 +113,10 @@ index_t gemm_f32_j11(char transa, char transb, index_t m, index_t n, index_t k,
   _mm512_mask_i32scatter_ps(c_ptr, mask, zmm1, czmm25, 0x4);
   c_ptr++;
   _mm512_mask_i32scatter_ps(c_ptr, mask, zmm1, czmm26, 0x4);
+  c_ptr++;
+  _mm512_mask_i32scatter_ps(c_ptr, mask, zmm1, czmm27, 0x4);
+  c_ptr++;
+  _mm512_mask_i32scatter_ps(c_ptr, mask, zmm1, czmm28, 0x4);
 }
 
 #endif
