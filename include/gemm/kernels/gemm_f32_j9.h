@@ -8,9 +8,10 @@
 
 #include "../../types/types.h"
 
-index_t gemm_f32_j9(char transa, char transb, index_t m, index_t n, index_t k,
-                    float alpha, float* a, index_t lda, float* b, index_t ldb,
-                    float beta, float* c, index_t ldc) {
+inline index_t gemm_f32_j9(char transa, char transb, index_t m, index_t n,
+                           index_t k, float alpha, float* a, index_t lda,
+                           float* b, index_t ldb, float beta, float* c,
+                           index_t ldc) {
   uint32_t arr_a[16];
   for (uint32_t i = 0; i < 16; ++i) {
     arr_a[i] = i * k;
