@@ -19,34 +19,53 @@ CMD_COLOR=\033[1;32m
 RESET_COLOR=\033[0m
 
 # object file names
-ODIR=$(BUILD_DIR)/bin
-MAIN_O=main.o
 ASM_GEMM_O=asm_gemm.o
+MAIN_O=main.o
+ODIR=$(BUILD_DIR)/bin
 TEST_O=test.o
+TEST_GATHER_O=test_gather.o
+TEST_GEMM_O=test_gemm.o
 TEST_GEMM_CUSTOM_O=test_gemm_custom.o
 TEST_GEMM_F32_O=test_gemm_f32.o
 TEST_GEMM_KERNEL_O=test_gemm_kernel.o
-TEST_GEMM_O=test_gemm.o
 TEST_TRANSPOSE_O=test_transpose.o
-TEST_GATHER_O=test_gather.o
 TEST_SCATTER_O=test_scatter.o
 
 # create object files in binary directory
-MAIN=$(patsubst %,$(ODIR)/%,$(MAIN_O))
 ASM_GEMM=$(patsubst %,$(ODIR)/%,$(ASM_GEMM_O))
+MAIN=$(patsubst %,$(ODIR)/%,$(MAIN_O))
+OUT_DIR=$(ODIR)
 TEST=$(patsubst %,$(ODIR)/%,$(TEST_O))
+TEST_GATHER=$(patsubst %,$(ODIR)/%,$(TEST_GATHER_O))
+TEST_GEMM=$(patsubst %,$(ODIR)/%,$(TEST_GEMM_O))
 TEST_GEMM_CUSTOM=$(patsubst %,$(ODIR)/%,$(TEST_GEMM_CUSTOM_O))
 TEST_GEMM_F32=$(patsubst %,$(ODIR)/%,$(TEST_GEMM_F32_O))
 TEST_GEMM_KERNEL=$(patsubst %,$(ODIR)/%,$(TEST_GEMM_KERNEL_O))
-TEST_GEMM=$(patsubst %,$(ODIR)/%,$(TEST_GEMM_O))
 TEST_TRANSPOSE=$(patsubst %,$(ODIR)/%,$(TEST_TRANSPOSE_O))
-TEST_GATHER=$(patsubst %,$(ODIR)/%,$(TEST_GATHER_O))
 TEST_SCATTER=$(patsubst %,$(ODIR)/%,$(TEST_SCATTER_O))
-OUT_DIR=$(ODIR)
+
 
 all: $(OUT_DIR) $(GOOGLE_TEST) $(TARGET)
 	@echo -n "${CMD_COLOR}"
 	@echo "${LINE_COLOR}Finished building target: $^${RESET_COLOR}" 
+	@echo "${RESET_COLOR}"
+
+$(ASM_GEMM): $(SRC_DIR)/asm/gemm.s
+	@echo "${LINE_COLOR}Building object file: $@${RESET_COLOR}"
+	@echo -n "${CMD_COLOR}"
+	$(CC) -o $@ -c $^
+	@echo "${RESET_COLOR}"
+
+$(GOOGLE_TEST):
+	@echo "${LINE_COLOR}Building object file: $@${RESET_COLOR}"
+	@echo -n "${CMD_COLOR}"
+	@cd $(BUILD_DIR)/$(GOOGLE_TEST) && cmake ../../$(GOOGLE_TEST) && make
+	@echo "${RESET_COLOR}"
+
+$(MAIN): $(SRC_DIR)/main.cc
+	@echo "${LINE_COLOR}Building object file: $@${RESET_COLOR}"	
+	@echo -n "${CMD_COLOR}"
+	$(CC) -o $@ -c $^ $(CFLAGS) -I $(MKL_INC_DIR) -I $(VTUNE_INC_DIR)
 	@echo "${RESET_COLOR}"
 
 $(OUT_DIR):
@@ -57,28 +76,16 @@ $(OUT_DIR):
 	${MKDIR_P} ${BUILD_DIR}/$(RESULT_DIR)
 	@echo "${RESET_COLOR}"
 
-$(GOOGLE_TEST):
-	@echo "${LINE_COLOR}Building object file: $@${RESET_COLOR}"
-	@echo -n "${CMD_COLOR}"
-	@cd $(BUILD_DIR)/$(GOOGLE_TEST) && cmake ../../$(GOOGLE_TEST) && make
-	@echo "${RESET_COLOR}"
-
-$(ASM_GEMM): $(SRC_DIR)/asm/gemm.s
-	@echo "${LINE_COLOR}Building object file: $@${RESET_COLOR}"
-	@echo -n "${CMD_COLOR}"
-	$(CC) -o $@ -c $^
-	@echo "${RESET_COLOR}"
-
-$(MAIN): $(SRC_DIR)/main.cc
-	@echo "${LINE_COLOR}Building object file: $@${RESET_COLOR}"	
-	@echo -n "${CMD_COLOR}"
-	$(CC) -o $@ -c $^ $(CFLAGS) -I $(MKL_INC_DIR) -I $(VTUNE_INC_DIR)
-	@echo "${RESET_COLOR}"
-
 $(TEST): $(TEST_DIR)/main.cc
 	@echo "${LINE_COLOR}Building object file: $@${RESET_COLOR}"	
 	@echo -n "${CMD_COLOR}"
 	$(CC) -o $@ -c $^ $(CFLAGS) -I $(GOOGLE_TEST)/$(GOOGLE_TEST)/include 
+	@echo "${RESET_COLOR}"
+
+$(TEST_GATHER): $(TEST_DIR)/mat/test_gather.cc
+	@echo "${LINE_COLOR}Building object file: $@${RESET_COLOR}"	
+	@echo -n "${CMD_COLOR}"
+	$(CC) -o $@ -c $< $(CFLAGS) -I $(GOOGLE_TEST)/$(GOOGLE_TEST)/include -I $(INCLUDE_DIR)
 	@echo "${RESET_COLOR}"
 
 $(TEST_GEMM_CUSTOM): $(TEST_DIR)/gemm/test_gemm_custom.cc $(INCLUDE_DIR)/gemm/gemm_custom.h
@@ -105,19 +112,13 @@ $(TEST_GEMM): $(TEST_DIR)/gemm/test_gemm.cc $(INCLUDE_DIR)/gemm/gemm.h
 	$(CC) -o $@ -c $< $(CFLAGS) -I $(GOOGLE_TEST)/$(GOOGLE_TEST)/include -I $(INCLUDE_DIR)
 	@echo "${RESET_COLOR}"
 
-$(TEST_TRANSPOSE): $(TEST_DIR)/mat/test_transpose.cc $(INCLUDE_DIR)/mat/transpose.h
-	@echo "${LINE_COLOR}Building object file: $@${RESET_COLOR}"	
-	@echo -n "${CMD_COLOR}"
-	$(CC) -o $@ -c $< $(CFLAGS) -I $(GOOGLE_TEST)/$(GOOGLE_TEST)/include -I $(INCLUDE_DIR)
-	@echo "${RESET_COLOR}"
-
-$(TEST_GATHER): $(TEST_DIR)/mat/test_gather.cc
-	@echo "${LINE_COLOR}Building object file: $@${RESET_COLOR}"	
-	@echo -n "${CMD_COLOR}"
-	$(CC) -o $@ -c $< $(CFLAGS) -I $(GOOGLE_TEST)/$(GOOGLE_TEST)/include -I $(INCLUDE_DIR)
-	@echo "${RESET_COLOR}"
-
 $(TEST_SCATTER): $(TEST_DIR)/mat/test_scatter.cc
+	@echo "${LINE_COLOR}Building object file: $@${RESET_COLOR}"	
+	@echo -n "${CMD_COLOR}"
+	$(CC) -o $@ -c $< $(CFLAGS) -I $(GOOGLE_TEST)/$(GOOGLE_TEST)/include -I $(INCLUDE_DIR)
+	@echo "${RESET_COLOR}"
+
+$(TEST_TRANSPOSE): $(TEST_DIR)/mat/test_transpose.cc $(INCLUDE_DIR)/mat/transpose.h
 	@echo "${LINE_COLOR}Building object file: $@${RESET_COLOR}"	
 	@echo -n "${CMD_COLOR}"
 	$(CC) -o $@ -c $< $(CFLAGS) -I $(GOOGLE_TEST)/$(GOOGLE_TEST)/include -I $(INCLUDE_DIR)
