@@ -28,6 +28,7 @@ TEST_GEMM_O=test_gemm.o
 TEST_GEMM_CUSTOM_O=test_gemm_custom.o
 TEST_GEMM_F32_O=test_gemm_f32.o
 TEST_GEMM_KERNEL_O=test_gemm_kernel.o
+TEST_JIT_O=test_jit.o
 TEST_TRANSPOSE_O=test_transpose.o
 TEST_SCATTER_O=test_scatter.o
 
@@ -41,6 +42,7 @@ TEST_GEMM=$(patsubst %,$(ODIR)/%,$(TEST_GEMM_O))
 TEST_GEMM_CUSTOM=$(patsubst %,$(ODIR)/%,$(TEST_GEMM_CUSTOM_O))
 TEST_GEMM_F32=$(patsubst %,$(ODIR)/%,$(TEST_GEMM_F32_O))
 TEST_GEMM_KERNEL=$(patsubst %,$(ODIR)/%,$(TEST_GEMM_KERNEL_O))
+TEST_JIT=$(patsubst %,$(ODIR)/%,$(TEST_JIT_O))
 TEST_TRANSPOSE=$(patsubst %,$(ODIR)/%,$(TEST_TRANSPOSE_O))
 TEST_SCATTER=$(patsubst %,$(ODIR)/%,$(TEST_SCATTER_O))
 
@@ -88,6 +90,12 @@ $(TEST_GATHER): $(TEST_DIR)/mat/test_gather.cc
 	$(CC) -o $@ -c $< $(CFLAGS) -I $(GOOGLE_TEST)/$(GOOGLE_TEST)/include -I $(INCLUDE_DIR)
 	@echo "${RESET_COLOR}"
 
+$(TEST_GEMM): $(TEST_DIR)/gemm/test_gemm.cc $(INCLUDE_DIR)/gemm/gemm.h
+	@echo "${LINE_COLOR}Building object file: $@${RESET_COLOR}"	
+	@echo -n "${CMD_COLOR}"
+	$(CC) -o $@ -c $< $(CFLAGS) -I $(GOOGLE_TEST)/$(GOOGLE_TEST)/include -I $(INCLUDE_DIR)
+	@echo "${RESET_COLOR}"
+
 $(TEST_GEMM_CUSTOM): $(TEST_DIR)/gemm/test_gemm_custom.cc $(INCLUDE_DIR)/gemm/gemm_custom.h
 	@echo "${LINE_COLOR}Building object file: $@${RESET_COLOR}"	
 	@echo -n "${CMD_COLOR}"
@@ -106,7 +114,7 @@ $(TEST_GEMM_KERNEL): $(TEST_DIR)/gemm/test_gemm_kernel.cc $(INCLUDE_DIR)/gemm/ke
 	$(CC) -o $@ -c $< $(CFLAGS) -I $(GOOGLE_TEST)/$(GOOGLE_TEST)/include -I $(INCLUDE_DIR)
 	@echo "${RESET_COLOR}"
 
-$(TEST_GEMM): $(TEST_DIR)/gemm/test_gemm.cc $(INCLUDE_DIR)/gemm/gemm.h
+$(TEST_JIT): $(TEST_DIR)/jit/test_jit.cc $(INCLUDE_DIR)/jit/code_store.h
 	@echo "${LINE_COLOR}Building object file: $@${RESET_COLOR}"	
 	@echo -n "${CMD_COLOR}"
 	$(CC) -o $@ -c $< $(CFLAGS) -I $(GOOGLE_TEST)/$(GOOGLE_TEST)/include -I $(INCLUDE_DIR)
@@ -131,7 +139,7 @@ main: $(MAIN) $(VTUNE_LIB_DIR)/libjitprofiling.a
 	@echo "${RESET_COLOR}"
 	@echo "${LINE_COLOR}BUILD SUCCESSFUL${RESET_COLOR}"
 
-test: $(TEST) $(TEST_GEMM_KERNEL) $(TEST_GEMM_F32) $(TEST_GATHER) $(TEST_SCATTER) $(TEST_TRANSPOSE) $(ASM_GEMM) $(TEST_GEMM) $(TEST_GEMM_CUSTOM) $(BUILD_DIR)/$(GOOGLE_TEST)/lib/libgtest.a
+test: $(TEST) $(TEST_GEMM_KERNEL) $(TEST_GEMM_F32) $(TEST_JIT) $(TEST_GATHER) $(TEST_SCATTER) $(TEST_TRANSPOSE) $(ASM_GEMM) $(TEST_GEMM) $(TEST_GEMM_CUSTOM) $(BUILD_DIR)/$(GOOGLE_TEST)/lib/libgtest.a
 	@echo "${LINE_COLOR}Linking object file $@ with $^${RESET_COLOR}"
 	@echo -n "${CMD_COLOR}"
 	$(CC) -o $(BUILD_DIR)/$@ $^ $(CFLAGS) -I $(INCLUDE_DIR) -I $(GOOGLE_TEST)/$(GOOGLE_TEST)/include -lpthread 
