@@ -44,9 +44,9 @@
 // beta   - factor of matrix B (alpha * AB + beta * C) @TODO(malith):
 // c      - pointer of type T of matrix C
 // ldc    - leading dimension of matrix C (stride offset) @TODO(malith):
-index_t sgemm(char transa, char transb, index_t m, index_t n, index_t k,
-              float alpha, float* a, index_t lda, float* b, index_t ldb,
-              float beta, float* c, index_t ldc) {
+inline index_t sgemm(char transa, char transb, index_t m, index_t n, index_t k,
+                     float alpha, float* a, index_t lda, float* b, index_t ldb,
+                     float beta, float* c, index_t ldc) {
   // full tile bounding limit
   index_t ftile_j_lim = (n / 15) * 15;
   index_t ftile_i_lim = m & ~(0xf);
