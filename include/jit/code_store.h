@@ -44,12 +44,7 @@ class CodeStore {
  public:
   CodeStore<T>();
   ~CodeStore<T>();
-  // set floating point constants across the full width of the register (16SP)
-  std::shared_ptr<std::vector<unsigned char>> set_16sp(T* constant_array,
-                                                       size_t size);
-  // set and broadcast B matrix
-  void set_broadcast_b_matrix(unsigned char* dest, T* constant_array,
-                              size_t size);
+
   size_t get_code_size_broadcast_b_matrix(T* b_matrix, size_t num_elements);
   size_t get_code_size_gemm_b_matrix(T* b_matrix, size_t k, size_t n);
   // generate instructions for B matrix
