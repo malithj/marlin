@@ -299,8 +299,7 @@ CodeStore<T>::generate_b_matrix(T* b_matrix, size_t k, size_t n) {
   for (index_t i = 0; i < k * n; ++i) {
     if (b_matrix[i] == 0) num_zeros++;
   }
-  const index_t total_code_size =
-      4435;  // get_code_size_gemm_b_matrix(b_matrix, k, n);
+  const index_t total_code_size = get_code_size_gemm_b_matrix(b_matrix, k, n);
 
   // define a vector to store generated B matrix code until transferred
   // to page memory
@@ -336,7 +335,7 @@ CodeStore<T>::generate_b_matrix(T* b_matrix, size_t k, size_t n) {
 
   if (ptile_j_remain) {
     for (index_t kk = 0; kk < k; ++kk) {
-      memset(buffer, 0, sizeof(T) * ptile_j_remain);
+      memset(buffer, 0, sizeof(T) * a_cols * b_cols);
       memcpy(buffer, b_matrix + kk * n + ftile_j_lim,
              ptile_j_remain * sizeof(T));
       set_broadcast_b_matrix(dest_ptr + tally_code_size, buffer,
@@ -375,8 +374,8 @@ size_t CodeStore<T>::get_code_size_broadcast_b_matrix(T* b_matrix,
 template <typename T>
 size_t CodeStore<T>::get_code_size_gemm_b_matrix(T* b_matrix, size_t k,
                                                  size_t n) {
-  size_t sc_size = sub_codelet_broadcast_b->size();
-  size_t sc_z_size = sub_codelet_broadcast_bz->size();
+  const size_t sc_size = sub_codelet_broadcast_b->size();
+  const size_t sc_z_size = sub_codelet_broadcast_bz->size();
 
   size_t num_zeros = 0;
   for (index_t i = 0; i < k * n; ++i) {
@@ -386,153 +385,19 @@ size_t CodeStore<T>::get_code_size_gemm_b_matrix(T* b_matrix, size_t k,
   LOG_DEBUG("sub codelet bz size: " + std::to_string(sc_z_size));
   LOG_DEBUG("number of zeros in B: " + std::to_string(num_zeros));
 
-  // abbreviated variable names
-  const index_t bsize = n;
-  const index_t ksize = k;
-  index_t b_cols = 15;
-  index_t a_cols = 1;
+  const index_t num_full_tiles = n / 15;
+  const index_t elems_per_full_tile = 15;
+  // full tile & partial tile bounding limit
+  const index_t ftile_j_lim = (n / 15) * 15;
+  const index_t ptile_j_remain = n - ftile_j_lim;
 
-  const index_t vertical_nblocks = k / ksize;
-  const index_t vertical_lblocks = k % ksize > 0 ? 1 : 0;
-  const index_t k_iters_per_nblock = ksize / a_cols;
-  const index_t k_remain_per_nblock = ksize % a_cols;
-  const index_t k_iters_per_lblock = (k % ksize) / a_cols;
-  const index_t k_remain_per_lblock = (k % ksize) % a_cols;
-  const index_t k_iters = k_iters_per_nblock * vertical_nblocks +
-                          k_iters_per_lblock * vertical_lblocks;
-
-  LOG_DEBUG("b size recorded as: " + std::to_string(bsize));
-  LOG_DEBUG("num b cols recorded as: " + std::to_string(b_cols));
-  LOG_DEBUG("num a cols recorded as: " + std::to_string(a_cols));
-  LOG_DEBUG("k iterations recorded as: " + std::to_string(k_iters));
-  LOG_DEBUG("k iters per nblock: " + std::to_string(k_iters_per_nblock));
-  LOG_DEBUG("k iters per lblock: " + std::to_string(k_iters_per_lblock));
-  LOG_DEBUG("k remain per nblock: " + std::to_string(k_remain_per_nblock));
-  LOG_DEBUG("k remain per lblock: " + std::to_string(k_remain_per_lblock));
-  LOG_DEBUG("k iters: " + std::to_string(k_iters));
-
-  // nblock: normal block code size for setting b constants
-  index_t melem = bsize / b_cols;  // main num of iterations
-  index_t nblock_b_code_size =
-      melem != 0 ? melem * (b_cols * a_cols * sc_size + 1) : 0;
-  index_t relem = bsize % b_cols;  // remaining iterations
-  index_t nblock_bz_code_size =
-      relem != 0 ? a_cols * (relem * sc_size + (b_cols - relem) * sc_z_size) + 1
-                 : 0;
-  // compute nblock code size
-  index_t nblock_code_size = nblock_b_code_size + nblock_bz_code_size;
-  LOG_DEBUG("num of iterations per normal block: " + std::to_string(melem));
-  LOG_DEBUG("normal block code size (assuming all nnz): " +
-            std::to_string(nblock_b_code_size));
-  LOG_DEBUG("remaining iterations per normal block: " + std::to_string(relem));
-  LOG_DEBUG("normal block code size for remainder (assuming all nnz): " +
-            std::to_string(nblock_bz_code_size));
-
-  // lblock: last block code size for setting b constants
-  index_t lblock_width = n % bsize;
-  melem = lblock_width / b_cols;
-  index_t lblock_b_code_size =
-      melem != 0 ? melem * (b_cols * a_cols * sc_size + 1) : 0;
-  relem = (lblock_width % b_cols);
-  index_t lblock_bz_code_size =
-      relem != 0 ? a_cols * (relem * sc_size + (b_cols - relem) * sc_z_size) + 1
-                 : 0;
-  // compute lblock code size
-  index_t lblock_code_size = lblock_b_code_size + lblock_bz_code_size;
-  LOG_DEBUG("last block code size: " + std::to_string(lblock_width));
-  LOG_DEBUG("last block full b row set number: " + std::to_string(melem));
-  LOG_DEBUG("last block remain elements of b: " + std::to_string(relem));
-
-  // compute number of normal blocks
-  const index_t num_nblocks = n / bsize;
-  // check whether a remainder block is available
-  const index_t num_lblocks = n % bsize != 0 ? 1 : 0;
-
-  const index_t total_code_full_k = k_iters * (num_nblocks * nblock_code_size +
-                                               num_lblocks * lblock_code_size);
-
-  // need to adjust to k remaining iterations
-  // normal block of j with normal block of k
-  melem = bsize / b_cols;  // main num of iterations
-  index_t k_nblock_j_nblock_b_code_size =
-      melem != 0 && k_remain_per_nblock != 0 && vertical_nblocks != 0
-          ? melem * (b_cols * k_remain_per_nblock * sc_size +
-                     b_cols * (a_cols - k_remain_per_nblock) * sc_z_size + 1)
-          : 0;
-  relem = bsize % b_cols;  // remaining iterations
-  index_t k_nblock_j_nblock_bz_code_size =
-      relem != 0 && k_remain_per_nblock != 0 && vertical_nblocks != 0
-          ? k_remain_per_nblock *
-                    (relem * sc_size + (b_cols - relem) * sc_z_size) +
-                (a_cols - k_remain_per_nblock) * b_cols * sc_z_size + 1
-          : 0;
-  index_t k_nblock_j_nblock_code_size =
-      k_nblock_j_nblock_b_code_size + k_nblock_j_nblock_bz_code_size;
-
-  // normal block of j with last block of k
-  melem = bsize / b_cols;  // main num of iterations
-  index_t k_lblock_j_nblock_b_code_size =
-      melem != 0 && k_remain_per_lblock != 0 && vertical_lblocks != 0
-          ? melem * (b_cols * k_remain_per_lblock * sc_size +
-                     b_cols * (a_cols - k_remain_per_lblock) * sc_z_size + 1)
-          : 0;
-  relem = bsize % b_cols;  // remaining iterations
-  index_t k_lblock_j_nblock_bz_code_size =
-      relem != 0 && k_remain_per_lblock != 0 && vertical_lblocks != 0
-          ? k_remain_per_lblock *
-                    (relem * sc_size + (b_cols - relem) * sc_z_size) +
-                (a_cols - k_remain_per_lblock) * b_cols * sc_z_size + 1
-          : 0;
-  index_t k_lblock_j_nblock_code_size =
-      k_lblock_j_nblock_b_code_size + k_lblock_j_nblock_bz_code_size;
-
-  // last block of j with normal block of k
-  lblock_width = n % bsize;
-  melem = lblock_width / b_cols;
-  index_t k_nblock_j_lblock_b_code_size =
-      melem != 0 && k_remain_per_nblock != 0 && vertical_nblocks != 0
-          ? melem * (b_cols * k_remain_per_nblock * sc_size +
-                     b_cols * (a_cols - k_remain_per_nblock) * sc_z_size + 1)
-          : 0;
-  relem = (lblock_width % b_cols);
-  index_t k_nblock_j_lblock_bz_code_size =
-      relem != 0 && k_remain_per_nblock != 0 && vertical_nblocks != 0
-          ? k_remain_per_nblock *
-                    (relem * sc_size + (b_cols - relem) * sc_z_size) +
-                (a_cols - k_remain_per_nblock) * b_cols * sc_z_size + 1
-          : 0;
-  index_t k_nblock_j_lblock_code_size =
-      k_nblock_j_lblock_b_code_size + k_nblock_j_lblock_bz_code_size;
-
-  // last block of j with last block of k
-  lblock_width = n % bsize;
-  melem = lblock_width / b_cols;
-  index_t k_lblock_j_lblock_b_code_size =
-      melem != 0 && k_remain_per_lblock != 0 && vertical_lblocks != 0
-          ? melem * (b_cols * k_remain_per_lblock * sc_size +
-                     b_cols * (a_cols - k_remain_per_lblock) * sc_z_size + 1)
-          : 0;
-  relem = (lblock_width % b_cols);
-  index_t k_lblock_j_lblock_bz_code_size =
-      relem != 0 && k_remain_per_lblock != 0 && vertical_lblocks != 0
-          ? k_remain_per_lblock *
-                    (relem * sc_size + (b_cols - relem) * sc_z_size) +
-                (a_cols - k_remain_per_lblock) * b_cols * sc_z_size + 1
-          : 0;
-  index_t k_lblock_j_lblock_code_size =
-      k_lblock_j_lblock_b_code_size + k_lblock_j_lblock_bz_code_size;
-
-  nblock_code_size = vertical_nblocks * k_nblock_j_nblock_code_size +
-                     vertical_lblocks * k_lblock_j_nblock_code_size;
-  lblock_code_size = vertical_nblocks * k_nblock_j_lblock_code_size +
-                     vertical_lblocks * k_lblock_j_lblock_code_size;
-
-  const index_t total_code_remain_k =
-      num_nblocks * nblock_code_size + num_lblocks * lblock_code_size;
-  const index_t total_code = total_code_full_k + total_code_remain_k;
+  const index_t full_tile_code =
+      (elems_per_full_tile * sc_size + 1) * num_full_tiles * k;
+  const index_t partial_tile_code = (ptile_j_remain * sc_size + 1) * k;
+  const index_t zero_optimized_code = num_zeros * (sc_size - sc_z_size);
 
   const index_t total_code_size =
-      total_code - (sc_size - sc_z_size) * num_zeros;
+      full_tile_code + partial_tile_code - zero_optimized_code;
   return total_code_size;
 }
 
