@@ -13,18 +13,16 @@
 #include <unordered_map>
 #include <vector>
 
-#include "../../log/logging.h"
-#include "../ibase/ibase.h"
+#include "../log/logging.h"
 #include "../mem/memory.h"
-#include "codelet.h"
-#include "types.h"
+#include "../types/types.h"
 
 using namespace Logging::LoggingInternals;
 
 // CodeStore allocates virtual pages and creates Codelet containers that
 // relay execution commands to the underlying page.
 template <typename T>
-class CodeStore : public IBase<T> {
+class CodeStore {
  private:
   std::unique_ptr<Logger> logger;
   std::unique_ptr<std::vector<unsigned char>> sub_codelet_set_16_sp;
@@ -42,7 +40,6 @@ class CodeStore : public IBase<T> {
   index_t b_matrix_j_block_size = 64;
   index_t b_matrix_k_block_size = 64;
   index_t b_load_elements = 15;
-  TILING_SCHEME tiling_scheme = B_COL_15_A_COL_1;
 
  public:
   CodeStore<T>();
@@ -55,10 +52,6 @@ class CodeStore : public IBase<T> {
                               size_t size);
   size_t get_code_size_broadcast_b_matrix(T* b_matrix, size_t num_elements);
   size_t get_code_size_gemm_b_matrix(T* b_matrix, size_t k, size_t n);
-  index_t get_b_load_elements() { return b_load_elements; }
-  index_t get_j_block_size() { return b_matrix_j_block_size; }
-  index_t get_k_block_size() { return b_matrix_k_block_size; }
-  TILING_SCHEME get_tiling_scheme() { return tiling_scheme; }
   // generate instructions for B matrix
   std::tuple<std::shared_ptr<std::vector<unsigned char>>,
              std::shared_ptr<std::vector<index_t>>>
@@ -90,11 +83,6 @@ class CodeStore : public IBase<T> {
   void replace_zmm_bz(unsigned char* sub_codelet, unsigned char reg_zmm);
   // adapt the code to different B constant values
   void replace_b(unsigned char* sub_codelet, T* array, unsigned char reg_zmm);
-  // set internal parameters
-  void set_b_load_elements(index_t ble) { this->b_load_elements = ble; };
-  void set_tiling_scheme(TILING_SCHEME scheme) {
-    this->tiling_scheme = scheme;
-  };
 };
 
 template <typename T>
@@ -311,10 +299,8 @@ CodeStore<T>::generate_b_matrix(T* b_matrix, size_t k, size_t n) {
   for (index_t i = 0; i < k * n; ++i) {
     if (b_matrix[i] == 0) num_zeros++;
   }
-  T sparsity = static_cast<T>(num_zeros / static_cast<T>(k * n));
-  b_matrix_k_block_size = b_matrix_j_block_size =
-      this->compute_adjusted_blocks(sparsity);
-  const index_t total_code_size = get_code_size_gemm_b_matrix(b_matrix, k, n);
+  const index_t total_code_size =
+      4435;  // get_code_size_gemm_b_matrix(b_matrix, k, n);
 
   // define a vector to store generated B matrix code until transferred
   // to page memory
@@ -323,74 +309,44 @@ CodeStore<T>::generate_b_matrix(T* b_matrix, size_t k, size_t n) {
   std::shared_ptr<std::vector<index_t>> track =
       std::make_shared<std::vector<index_t>>();
 
-  if (this->b_load_elements > 15) {
-    throw std::invalid_argument(
-        "cannot broadcast more than 15 values of B. (total registers available "
-        "on AVX512 is 32. C requires same number of registers allocated to B. "
-        "A requires at least one register.). requested registers for B: " +
-        std::to_string(this->b_load_elements));
-  }
+  // full tile bounding limit
+  index_t ftile_j_lim = (n / 15) * 15;
+  // partial tile bounding limit
+  index_t ptile_j_remain = n - ftile_j_lim;
 
   index_t b_cols = 15;
   index_t a_cols = 1;
-  if (this->tiling_scheme == B_COL_15_A_COL_1) {
-    b_cols = 15;
-    a_cols = 1;
-  } else if (this->tiling_scheme == B_COL_10_A_COL_2) {
-    b_cols = 10;
-    a_cols = 2;
-  } else if (this->tiling_scheme == B_COL_7_A_COL_3) {
-    b_cols = 7;
-    a_cols = 3;
-  } else if (this->tiling_scheme == B_COL_5_A_COL_4) {
-    b_cols = 5;
-    a_cols = 4;
-  } else if (this->tiling_scheme == B_COL_4_A_COL_5) {
-    b_cols = 4;
-    a_cols = 5;
-  } else if (this->tiling_scheme == B_COL_3_A_COL_7) {
-    b_cols = 3;
-    a_cols = 7;
-  } else if (this->tiling_scheme == B_COL_2_A_COL_10) {
-    b_cols = 2;
-    a_cols = 10;
-  } else if (this->tiling_scheme == B_COL_1_A_COL_15) {
-    b_cols = 1;
-    a_cols = 15;
-  } else {
-    throw std::invalid_argument("unknown micro-tiling scheme selected");
-  }
 
   T* buffer = static_cast<T*>(aligned_alloc(b_cols * a_cols, sizeof(T)));
   unsigned char* dest_ptr = code->data();
 
   index_t tally_code_size = 0;
-  for (index_t jb = 0; jb < n; jb += b_matrix_j_block_size) {
-    /* j block overflow condition */
-    index_t jb_lim = std::min(jb + b_matrix_j_block_size, n);
-    for (index_t kb = 0; kb < k; kb += b_matrix_k_block_size) {
-      /* k block overflow condition */
-      index_t kb_lim = std::min(kb + b_matrix_k_block_size, k);
-      // generate b matrix code
-      for (index_t kk = kb; kk < kb_lim; kk += a_cols) {
-        const index_t num_a_cols = kb_lim - kk >= a_cols ? a_cols : kb_lim - kk;
-        for (index_t jj = jb; jj < jb_lim; jj += b_cols) {
-          const index_t num_elems =
-              jb_lim - jj >= b_cols ? b_cols : jb_lim - jj;
-          memset(buffer, 0, sizeof(T) * a_cols * b_cols);
-          for (index_t buf_idx = 0; buf_idx < num_a_cols; ++buf_idx) {
-            memcpy(buffer + (b_cols * buf_idx),
-                   b_matrix + (kk + buf_idx) * n + jj, num_elems * sizeof(T));
-          }
-          set_broadcast_b_matrix(dest_ptr + tally_code_size, buffer,
-                                 b_cols * a_cols);
-          tally_code_size +=
-              get_code_size_broadcast_b_matrix(buffer, b_cols * a_cols);
-          track->push_back(tally_code_size);
-        }
-      }
+  // generate b matrix code
+  for (index_t jj = 0; jj < ftile_j_lim; jj += b_cols) {
+    for (index_t kk = 0; kk < k; ++kk) {
+      memset(buffer, 0, sizeof(T) * a_cols * b_cols);
+      memcpy(buffer, b_matrix + kk * n + jj, b_cols * sizeof(T));
+      set_broadcast_b_matrix(dest_ptr + tally_code_size, buffer,
+                             b_cols * a_cols);
+      tally_code_size +=
+          get_code_size_broadcast_b_matrix(buffer, b_cols * a_cols);
+      track->push_back(tally_code_size);
     }
   }
+
+  if (ptile_j_remain) {
+    for (index_t kk = 0; kk < k; ++kk) {
+      memset(buffer, 0, sizeof(T) * ptile_j_remain);
+      memcpy(buffer, b_matrix + kk * n + ftile_j_lim,
+             ptile_j_remain * sizeof(T));
+      set_broadcast_b_matrix(dest_ptr + tally_code_size, buffer,
+                             ptile_j_remain);
+      tally_code_size +=
+          get_code_size_broadcast_b_matrix(buffer, ptile_j_remain);
+      track->push_back(tally_code_size);
+    }
+  }
+
   if (tally_code_size != total_code_size) {
     throw std::runtime_error(
         "fatal error: expected code size different from the computed code "
@@ -422,10 +378,6 @@ size_t CodeStore<T>::get_code_size_gemm_b_matrix(T* b_matrix, size_t k,
   size_t sc_size = sub_codelet_broadcast_b->size();
   size_t sc_z_size = sub_codelet_broadcast_bz->size();
 
-  // adjust block sizes for small matrices
-  this->b_matrix_j_block_size = std::min(n, this->b_matrix_j_block_size);
-  this->b_matrix_k_block_size = std::min(k, this->b_matrix_k_block_size);
-
   size_t num_zeros = 0;
   for (index_t i = 0; i < k * n; ++i) {
     if (b_matrix[i] == 0) num_zeros++;
@@ -435,37 +387,11 @@ size_t CodeStore<T>::get_code_size_gemm_b_matrix(T* b_matrix, size_t k,
   LOG_DEBUG("number of zeros in B: " + std::to_string(num_zeros));
 
   // abbreviated variable names
-  const index_t bsize = b_matrix_j_block_size;
-  const index_t ksize = b_matrix_k_block_size;
+  const index_t bsize = n;
+  const index_t ksize = k;
   index_t b_cols = 15;
   index_t a_cols = 1;
-  if (this->tiling_scheme == B_COL_15_A_COL_1) {
-    b_cols = 15;
-    a_cols = 1;
-  } else if (this->tiling_scheme == B_COL_10_A_COL_2) {
-    b_cols = 10;
-    a_cols = 2;
-  } else if (this->tiling_scheme == B_COL_7_A_COL_3) {
-    b_cols = 7;
-    a_cols = 3;
-  } else if (this->tiling_scheme == B_COL_5_A_COL_4) {
-    b_cols = 5;
-    a_cols = 4;
-  } else if (this->tiling_scheme == B_COL_4_A_COL_5) {
-    b_cols = 4;
-    a_cols = 5;
-  } else if (this->tiling_scheme == B_COL_3_A_COL_7) {
-    b_cols = 3;
-    a_cols = 7;
-  } else if (this->tiling_scheme == B_COL_2_A_COL_10) {
-    b_cols = 2;
-    a_cols = 10;
-  } else if (this->tiling_scheme == B_COL_1_A_COL_15) {
-    b_cols = 1;
-    a_cols = 15;
-  } else {
-    throw std::invalid_argument("unknown micro-tiling scheme selected");
-  }
+
   const index_t vertical_nblocks = k / ksize;
   const index_t vertical_lblocks = k % ksize > 0 ? 1 : 0;
   const index_t k_iters_per_nblock = ksize / a_cols;
