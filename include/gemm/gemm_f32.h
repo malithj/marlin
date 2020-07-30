@@ -1,5 +1,5 @@
-#ifndef __GEMM_CUSTOM_H_
-#define __GEMM_CUSTOM_H_
+#ifndef __GEMM_F32_H_
+#define __GEMM_F32_H_
 
 #include <immintrin.h>
 #include <memory.h>
@@ -7,6 +7,9 @@
 #include <iostream>
 
 #include "../types/types.h"
+#ifdef JIT
+
+#else
 #include "./kernels/gemm_f32_j1.h"
 #include "./kernels/gemm_f32_j10.h"
 #include "./kernels/gemm_f32_j11.h"
@@ -22,6 +25,7 @@
 #include "./kernels/gemm_f32_j7.h"
 #include "./kernels/gemm_f32_j8.h"
 #include "./kernels/gemm_f32_j9.h"
+#endif
 
 // Performs GEMM (General Matrix Multiplication)
 // block size for all three dimensions is set to the above "N" value by

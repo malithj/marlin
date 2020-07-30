@@ -1,6 +1,6 @@
 CC=g++
-CFLAGS=-march=skylake-avx512 -g
-TEST_FLAGS=-Wall -ftest-coverage -fprofile-arcs -march=skylake-avx512 -g
+CFLAGS=-march=skylake-avx512
+TEST_FLAGS=-Wall -march=skylake-avx512 -g -DJIT
 TARGET=main
 TEST_TARGET=test
 BUILD_DIR=build
@@ -81,55 +81,55 @@ $(OUT_DIR):
 $(TEST): $(TEST_DIR)/main.cc
 	@echo "${LINE_COLOR}Building object file: $@${RESET_COLOR}"	
 	@echo -n "${CMD_COLOR}"
-	$(CC) -o $@ -c $^ $(CFLAGS) -I $(GOOGLE_TEST)/$(GOOGLE_TEST)/include 
+	$(CC) -o $@ -c $^ $(TEST_FLAGS) -I $(GOOGLE_TEST)/$(GOOGLE_TEST)/include 
 	@echo "${RESET_COLOR}"
 
 $(TEST_GATHER): $(TEST_DIR)/mat/test_gather.cc
 	@echo "${LINE_COLOR}Building object file: $@${RESET_COLOR}"	
 	@echo -n "${CMD_COLOR}"
-	$(CC) -o $@ -c $< $(CFLAGS) -I $(GOOGLE_TEST)/$(GOOGLE_TEST)/include -I $(INCLUDE_DIR)
+	$(CC) -o $@ -c $< $(TEST_FLAGS) -I $(GOOGLE_TEST)/$(GOOGLE_TEST)/include -I $(INCLUDE_DIR)
 	@echo "${RESET_COLOR}"
 
 $(TEST_GEMM): $(TEST_DIR)/gemm/test_gemm.cc $(INCLUDE_DIR)/gemm/gemm.h
 	@echo "${LINE_COLOR}Building object file: $@${RESET_COLOR}"	
 	@echo -n "${CMD_COLOR}"
-	$(CC) -o $@ -c $< $(CFLAGS) -I $(GOOGLE_TEST)/$(GOOGLE_TEST)/include -I $(INCLUDE_DIR)
+	$(CC) -o $@ -c $< $(TEST_FLAGS) -I $(GOOGLE_TEST)/$(GOOGLE_TEST)/include -I $(INCLUDE_DIR)
 	@echo "${RESET_COLOR}"
 
 $(TEST_GEMM_CUSTOM): $(TEST_DIR)/gemm/test_gemm_custom.cc $(INCLUDE_DIR)/gemm/gemm_custom.h
 	@echo "${LINE_COLOR}Building object file: $@${RESET_COLOR}"	
 	@echo -n "${CMD_COLOR}"
-	$(CC) -o $@ -c $< $(CFLAGS) -I $(GOOGLE_TEST)/$(GOOGLE_TEST)/include -I $(INCLUDE_DIR)
+	$(CC) -o $@ -c $< $(TEST_FLAGS) -I $(GOOGLE_TEST)/$(GOOGLE_TEST)/include -I $(INCLUDE_DIR)
 	@echo "${RESET_COLOR}"
 
 $(TEST_GEMM_F32): $(TEST_DIR)/gemm/test_gemm_f32.cc $(INCLUDE_DIR)/gemm/kernels/*.h $(INCLUDE_DIR)/gemm/gemm_f32.h
 	@echo "${LINE_COLOR}Building object file: $@${RESET_COLOR}"	
 	@echo -n "${CMD_COLOR}"
-	$(CC) -o $@ -c $< $(CFLAGS) -I $(GOOGLE_TEST)/$(GOOGLE_TEST)/include -I $(INCLUDE_DIR)
+	$(CC) -o $@ -c $< $(TEST_FLAGS) -I $(GOOGLE_TEST)/$(GOOGLE_TEST)/include -I $(INCLUDE_DIR)
 	@echo "${RESET_COLOR}"
 
 $(TEST_GEMM_KERNEL): $(TEST_DIR)/gemm/test_gemm_kernel.cc $(INCLUDE_DIR)/gemm/kernels/*.h
 	@echo "${LINE_COLOR}Building object file: $@${RESET_COLOR}"	
 	@echo -n "${CMD_COLOR}"
-	$(CC) -o $@ -c $< $(CFLAGS) -I $(GOOGLE_TEST)/$(GOOGLE_TEST)/include -I $(INCLUDE_DIR)
+	$(CC) -o $@ -c $< $(TEST_FLAGS) -I $(GOOGLE_TEST)/$(GOOGLE_TEST)/include -I $(INCLUDE_DIR)
 	@echo "${RESET_COLOR}"
 
 $(TEST_JIT): $(TEST_DIR)/jit/test_jit.cc $(INCLUDE_DIR)/jit/code_store.h
 	@echo "${LINE_COLOR}Building object file: $@${RESET_COLOR}"	
 	@echo -n "${CMD_COLOR}"
-	$(CC) -o $@ -c $< $(CFLAGS) -I $(GOOGLE_TEST)/$(GOOGLE_TEST)/include -I $(INCLUDE_DIR)
+	$(CC) -o $@ -c $< $(TEST_FLAGS) -I $(GOOGLE_TEST)/$(GOOGLE_TEST)/include -I $(INCLUDE_DIR)
 	@echo "${RESET_COLOR}"
 
 $(TEST_SCATTER): $(TEST_DIR)/mat/test_scatter.cc
 	@echo "${LINE_COLOR}Building object file: $@${RESET_COLOR}"	
 	@echo -n "${CMD_COLOR}"
-	$(CC) -o $@ -c $< $(CFLAGS) -I $(GOOGLE_TEST)/$(GOOGLE_TEST)/include -I $(INCLUDE_DIR)
+	$(CC) -o $@ -c $< $(TEST_FLAGS) -I $(GOOGLE_TEST)/$(GOOGLE_TEST)/include -I $(INCLUDE_DIR)
 	@echo "${RESET_COLOR}"
 
 $(TEST_TRANSPOSE): $(TEST_DIR)/mat/test_transpose.cc $(INCLUDE_DIR)/mat/transpose.h
 	@echo "${LINE_COLOR}Building object file: $@${RESET_COLOR}"	
 	@echo -n "${CMD_COLOR}"
-	$(CC) -o $@ -c $< $(CFLAGS) -I $(GOOGLE_TEST)/$(GOOGLE_TEST)/include -I $(INCLUDE_DIR)
+	$(CC) -o $@ -c $< $(TEST_FLAGS) -I $(GOOGLE_TEST)/$(GOOGLE_TEST)/include -I $(INCLUDE_DIR)
 	@echo "${RESET_COLOR}"
 
 main: $(MAIN) $(VTUNE_LIB_DIR)/libjitprofiling.a
@@ -142,7 +142,7 @@ main: $(MAIN) $(VTUNE_LIB_DIR)/libjitprofiling.a
 test: $(TEST) $(TEST_GEMM_KERNEL) $(TEST_GEMM_F32) $(TEST_JIT) $(TEST_GATHER) $(TEST_SCATTER) $(TEST_TRANSPOSE) $(ASM_GEMM) $(TEST_GEMM) $(TEST_GEMM_CUSTOM) $(BUILD_DIR)/$(GOOGLE_TEST)/lib/libgtest.a
 	@echo "${LINE_COLOR}Linking object file $@ with $^${RESET_COLOR}"
 	@echo -n "${CMD_COLOR}"
-	$(CC) -o $(BUILD_DIR)/$@ $^ $(CFLAGS) -I $(INCLUDE_DIR) -I $(GOOGLE_TEST)/$(GOOGLE_TEST)/include -lpthread 
+	$(CC) -o $(BUILD_DIR)/$@ $^ $(TEST_FLAGS) -I $(INCLUDE_DIR) -I $(GOOGLE_TEST)/$(GOOGLE_TEST)/include -lpthread 
 
 .PHONY: clean googletest
 
