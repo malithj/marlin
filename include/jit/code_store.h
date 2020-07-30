@@ -70,14 +70,6 @@ class CodeStore {
   // execute the code
   bool execute(T* ptr);
   bool fast_execute(index_t offset);
-  // pretty print the code based on formatting predefined
-  void pretty_print_16sp(std::shared_ptr<std::vector<unsigned char>> hex_ins);
-  void pretty_print_gemm_b(std::shared_ptr<std::vector<unsigned char>> hex_ins);
-  // adapt the code to different ZMM registers
-  void replace_zmm_b(unsigned char* sub_codelet, unsigned char reg_zmm);
-  void replace_zmm_bz(unsigned char* sub_codelet, unsigned char reg_zmm);
-  // adapt the code to different B constant values
-  void replace_b(unsigned char* sub_codelet, T* array, unsigned char reg_zmm);
 };
 
 template <typename T>
