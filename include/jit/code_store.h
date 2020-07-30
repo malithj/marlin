@@ -32,14 +32,14 @@ class CodeStore {
   std::shared_ptr<std::vector<index_t>> codelet_pos;
   size_t page_size_bytes_allocated = 0;
   void* p_addr = nullptr;
-  // hashmap support
-  bool hashmap_support_on = false;
-  // define block params for code generation. !!!Important
-  // these parameters must be consistent with GEMM block parameters.
-  // Otherwise prefetchers might need to handle extra processing.
-  index_t b_matrix_j_block_size = 64;
-  index_t b_matrix_k_block_size = 64;
-  index_t b_load_elements = 15;
+  // set and broadcast B matrix
+  void set_broadcast_b_matrix(unsigned char* dest, T* constant_array,
+                              size_t size);
+  // adapt the code to different ZMM registers
+  void replace_zmm_b(unsigned char* sub_codelet, unsigned char reg_zmm);
+  void replace_zmm_bz(unsigned char* sub_codelet, unsigned char reg_zmm);
+  // adapt the code to different B constant values
+  void replace_b(unsigned char* sub_codelet, T* array, unsigned char reg_zmm);
 
  public:
   CodeStore<T>();
