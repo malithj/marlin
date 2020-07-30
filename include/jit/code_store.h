@@ -25,7 +25,6 @@ template <typename T>
 class CodeStore {
  private:
   std::unique_ptr<Logger> logger;
-  std::unique_ptr<std::vector<unsigned char>> sub_codelet_set_16_sp;
   std::unique_ptr<std::vector<unsigned char>> sub_codelet_broadcast_b;
   std::unique_ptr<std::vector<unsigned char>> sub_codelet_broadcast_bz;
   // fast execute method uses codelet positions
@@ -60,8 +59,6 @@ class CodeStore {
   // read code and offset from file
   void fromfile(std::string& filename, index_t n, index_t k, index_t mode);
   std::shared_ptr<std::vector<index_t>> get_codelet_pos();
-  bool verify_instruction_integrity_16sp(
-      std::shared_ptr<std::vector<unsigned char>> hex_ins);
   // Copy the code from the provided vector containing unsigned char bytes to
   // a virtual page obtained by the OS. Set the appropriate permissions
   void copy_code_to_execution_space(
@@ -79,81 +76,6 @@ CodeStore<T>::CodeStore() {
   // rsi -> rdi move required to set the memory location of the array to be
   // overwritten). The following codelet loads 1 - 16 floating point numbers to
   // ZMM0 register and stores the values in the register (16 SPs) to memory.
-  //
-  unsigned char sub_codelet_16_sp[382] = {
-      0x48, 0x83, 0xec, 0x40,                                // 3c
-      0x48, 0xc7, 0x44, 0x24, 0xf8, 0x00, 0x00, 0x80, 0x41,  // 40
-      0x48, 0xc7, 0x44, 0x24, 0xf0, 0x00, 0x00, 0x70, 0x41,  // 49
-      0x48, 0xc7, 0x44, 0x24, 0xe8, 0x00, 0x00, 0x60, 0x41,  // 52
-      0x48, 0xc7, 0x44, 0x24, 0xe0, 0x00, 0x00, 0x50, 0x41,  // 5b
-      0x48, 0xc7, 0x44, 0x24, 0xd8, 0x00, 0x00, 0x40, 0x41,  // 64
-      0x48, 0xc7, 0x44, 0x24, 0xd0, 0x00, 0x00, 0x30, 0x41,  // 6d
-      0x48, 0xc7, 0x44, 0x24, 0xc8, 0x00, 0x00, 0x20, 0x41,  // 76
-      0x48, 0xc7, 0x44, 0x24, 0xc0, 0x00, 0x00, 0x10, 0x41,  // 7f
-      0x48, 0xc7, 0xc0, 0x00, 0x00, 0x00, 0x41,              // 88
-      0x66, 0x48, 0x0f, 0x6e, 0xf8,                          // 8f
-      0x48, 0xc7, 0xc0, 0x00, 0x00, 0xe0, 0x40,              // 94
-      0x66, 0x48, 0x0f, 0x6e, 0xf0,                          // 9b
-      0x48, 0xc7, 0xc0, 0x00, 0x00, 0xc0, 0x40,              // a0
-      0x66, 0x48, 0x0f, 0x6e, 0xe8,                          // a7
-      0x48, 0xc7, 0xc0, 0x00, 0x00, 0xa0, 0x40,              // ac
-      0x66, 0x48, 0x0f, 0x6e, 0xe0,                          // b3
-      0x48, 0xc7, 0xc0, 0x00, 0x00, 0x80, 0x40,              // b8
-      0x66, 0x48, 0x0f, 0x6e, 0xd8,                          // bf
-      0x48, 0xc7, 0xc0, 0x00, 0x00, 0x40, 0x40,              // c4
-      0x66, 0x48, 0x0f, 0x6e, 0xd0,                          // cb
-      0x48, 0xc7, 0xc0, 0x00, 0x00, 0x00, 0x40,              // d0
-      0x66, 0x48, 0x0f, 0x6e, 0xc8,                          // d7
-      0x48, 0xc7, 0xc0, 0x00, 0x00, 0x80, 0x3f,              // dc
-      0x66, 0x48, 0x0f, 0x6e, 0xc0,                          // e3
-      0x0f, 0xc6, 0xc0, 0x15,                                // 38
-      0x0f, 0xc6, 0xc9, 0x45,                                // ec
-      0x0f, 0xc6, 0xd2, 0x51,                                // f0
-      0x0f, 0x58, 0xc1,                                      // f4
-      0x0f, 0x58, 0xc2,                                      // f7
-      0x0f, 0x58, 0xc3,                                      // fa
-      0xc4, 0xe3, 0x7d, 0x18, 0xc0, 0x01,                    // fd
-      0x0f, 0x28, 0xc4,                                      // 103
-      0x0f, 0x28, 0xcd,                                      // 106
-      0x0f, 0x28, 0xd6,                                      // 109
-      0x0f, 0x28, 0xdf,                                      // 10c
-      0x0f, 0xc6, 0xc0, 0x15,                                // 10f
-      0x0f, 0xc6, 0xc9, 0x45,                                // 113
-      0x0f, 0xc6, 0xd2, 0x51,                                // 117
-      0x0f, 0x58, 0xc1,                                      // 11b
-      0x0f, 0x58, 0xc2,                                      // 11e
-      0x0f, 0x58, 0xc3,                                      // 121
-      0x62, 0xf1, 0x74, 0x48, 0x57, 0xc9,                    // 124
-      0x62, 0xf3, 0xf5, 0x48, 0x1a, 0xc8, 0x01,              // 12a
-      0x62, 0xf1, 0x54, 0x48, 0x57, 0xed,                    // 131
-      0x62, 0xf1, 0x7c, 0x48, 0x28, 0xe9,                    // 137
-      0x66, 0x0f, 0x6e, 0x44, 0x24, 0xc0,                    // 13d
-      0x66, 0x0f, 0x6e, 0x4c, 0x24, 0xc8,                    // 143
-      0x66, 0x0f, 0x6e, 0x54, 0x24, 0xd0,                    // 149
-      0x66, 0x0f, 0x6e, 0x5c, 0x24, 0xd8,                    // 14f
-      0x0f, 0xc6, 0xc0, 0x15,                                // 155
-      0x0f, 0xc6, 0xc9, 0x45,                                // 159
-      0x0f, 0xc6, 0xd2, 0x51,                                // 15d
-      0x0f, 0x58, 0xc1,                                      // 161
-      0x0f, 0x58, 0xc2,                                      // 164
-      0x0f, 0x58, 0xc3,                                      // 167
-      0xc4, 0xe3, 0x7d, 0x18, 0xc0, 0x01,                    // 16a
-      0x66, 0x0f, 0x6e, 0x44, 0x24, 0xe0,                    // 170
-      0x66, 0x0f, 0x6e, 0x4c, 0x24, 0xe8,                    // 176
-      0x66, 0x0f, 0x6e, 0x54, 0x24, 0xf0,                    // 17c
-      0x66, 0x0f, 0x6e, 0x5c, 0x24, 0xf8,                    // 182
-      0x0f, 0xc6, 0xc0, 0x15,                                // 188
-      0x0f, 0xc6, 0xc9, 0x45,                                // 18c
-      0x0f, 0xc6, 0xd2, 0x51,                                // 190
-      0x0f, 0x58, 0xc1,                                      // 194
-      0x0f, 0x58, 0xc2,                                      // 197
-      0x0f, 0x58, 0xc3,                                      // 19a
-      0x62, 0xf1, 0x7c, 0x48, 0x58, 0xc5,                    // 19d
-      0x62, 0x71, 0x7c, 0x48, 0x28, 0xc0,                    // 1a3
-      0x48, 0x83, 0xc4, 0x40,                                // 1a9
-      0x62, 0xd1, 0x7c, 0x48, 0x28, 0xc0,                    // 1ad
-      0x62, 0xf1, 0x7c, 0x48, 0x29, 0x07,                    // 1b
-      0xc3};                                                 // return}
   unsigned char sub_codelet_b[11] = {
       0xb8, 0x00, 0x00, 0x00, 0x41,       // mov     eax, 0x41000000
       0x62, 0xf2, 0x7d, 0x48, 0x7c, 0xc0  // vpbroadcastd zmm0, eax
@@ -161,9 +83,6 @@ CodeStore<T>::CodeStore() {
   unsigned char sub_codelet_bz[6] = {
       0x62, 0xf1, 0x7c, 0x48, 0x57, 0xc0  // vxorps zmm0, zmm0, zmm0
   };
-
-  this->sub_codelet_set_16_sp = std::make_unique<std::vector<unsigned char>>(
-      sub_codelet_16_sp, sub_codelet_16_sp + sizeof(sub_codelet_16_sp));
   this->sub_codelet_broadcast_b = std::make_unique<std::vector<unsigned char>>(
       sub_codelet_b, sub_codelet_b + sizeof(sub_codelet_b));
   this->sub_codelet_broadcast_bz = std::make_unique<std::vector<unsigned char>>(
@@ -173,61 +92,6 @@ CodeStore<T>::CodeStore() {
 template <typename T>
 CodeStore<T>::~CodeStore() {
   munmap(this->p_addr, this->page_size_bytes_allocated);
-}
-
-// verification of instructions only performed for constant setting
-template <typename T>
-bool CodeStore<T>::verify_instruction_integrity_16sp(
-    std::shared_ptr<std::vector<unsigned char>> hex_ins) {
-  uint8_t locations_modified[hex_ins->size()];
-  memset(&locations_modified, 0, hex_ins->size());
-
-  /* identify locations modified */
-  for (index_t i = 0; i < 16; ++i) {
-    const index_t idx = 9 + (i < 8 ? 9 * i : 70 + (i - 8) * 12);
-    for (index_t j = 0; j < 4; ++j) {
-      locations_modified[idx + j] = 1;
-    }
-  }
-  /* verify other instructions */
-  for (index_t i = 0; i < hex_ins->size(); ++i) {
-    if (locations_modified[i] == 0 &&
-        hex_ins->at(i) != this->sub_codelet_set_16_sp->at(i)) {
-      throw std::domain_error(
-          "Integrity of instructions compromised. Cannot recover state.");
-    }
-  }
-  return true;
-}
-
-template <typename T>
-std::shared_ptr<std::vector<unsigned char>> CodeStore<T>::set_16sp(
-    T* constant_array, size_t size) {
-  size_t byte_size = this->sub_codelet_set_16_sp->size();
-
-  // create a copy of the vector as shared
-  std::shared_ptr<std::vector<unsigned char>> __sub_codelet =
-      std::make_shared<std::vector<unsigned char>>(byte_size);
-  std::memcpy(__sub_codelet->data(), this->sub_codelet_set_16_sp->data(),
-              byte_size);
-
-  // create a buffer to separate out the bytes of a given floating point number
-  unsigned char buffer[4];
-
-  for (index_t i = 0; i < size; ++i) {
-    // figure out start index. The first number starts at idx 9 (offloads to
-    // stack). The offset of the stack numbers are 9. Afterwards the offset
-    // changes to 12. This is handled in the following one liner.
-    const index_t idx = 9 + (i < 8 ? 9 * i : 70 + (i - 8) * 12);
-
-    // copy the memory and set bytes
-    memcpy(&buffer, constant_array + i, sizeof(float));
-    __sub_codelet->at(idx) = buffer[0];
-    __sub_codelet->at(idx + 1) = buffer[1];
-    __sub_codelet->at(idx + 2) = buffer[2];
-    __sub_codelet->at(idx + 3) = buffer[3];
-  }
-  return __sub_codelet;
 }
 
 template <typename T>
@@ -498,63 +362,6 @@ bool CodeStore<T>::fast_execute(index_t offset) {
 }
 
 template <typename T>
-void CodeStore<T>::pretty_print_16sp(
-    std::shared_ptr<std::vector<unsigned char>> hex_ins) {
-  index_t idx_7 = 0;
-  index_t idx_12 = 0;
-  for (index_t i = 0; i < hex_ins->size(); ++i) {
-    printf("0x%02x, ", hex_ins->at(i));
-    if (i == 3) {
-      printf("\n");
-    } else if (i > 75) {
-      if ((i - 75) == (idx_7 * 12 + 7)) {
-        printf("\n");
-        idx_7++;
-      } else if ((i - 75) == (idx_12 * 12 + 12)) {
-        printf("\n");
-        idx_12++;
-      }
-    } else if (i >= 12 && (i - 12) % 9 == 0) {
-      printf("\n");
-    }
-  }
-}
-
-template <typename T>
-void CodeStore<T>::pretty_print_gemm_b(
-    std::shared_ptr<std::vector<unsigned char>> hex_ins) {
-  bool bflag = false;
-  bool zflag = false;
-  for (index_t i = 0; i < hex_ins->size(); ++i) {
-    if (i > 2 && hex_ins->at(i - 2) == 0xc7 && hex_ins->at(i - 1) == 0xc0) {
-      bflag = true;
-    }
-    if (hex_ins->at(i) == 0x62 && hex_ins->at(i + 4) == 0x57) {
-      zflag = true;
-    }
-    if (bflag) {
-      printf("\033[0;33m");
-      printf("%02x ", hex_ins->at(i));
-    } else if (zflag) {
-      printf("\033[1;32m");
-      printf("%02x ", hex_ins->at(i));
-    } else {
-      printf("%02x ", hex_ins->at(i));
-    }
-    if (hex_ins->at(i) == 0xc3) {
-      printf("\n");
-    }
-    printf("\033[0m");
-    if (i > 5 && hex_ins->at(i - 5) == 0xc7 && hex_ins->at(i - 4) == 0xc0) {
-      bflag = false;
-    }
-    if (i > 4 && hex_ins->at(i - 5) == 0x62 && hex_ins->at(i - 1) == 0x57) {
-      zflag = false;
-    }
-  }
-}
-
-template <typename T>
 void CodeStore<T>::replace_b(unsigned char* sub_codelet, T* constant_array,
                              unsigned char reg) {
   unsigned char* ptr = sub_codelet;
@@ -621,8 +428,8 @@ void CodeStore<T>::tofile(
   std::shared_ptr<std::vector<index_t>> pos = std::get<1>(code_obj);
 
   // insert header file information to code
-  pos->insert(pos->begin(), b_matrix_k_block_size);
-  pos->insert(pos->begin(), b_matrix_j_block_size);
+  pos->insert(pos->begin(), 0x1);
+  pos->insert(pos->begin(), 0xf);
   pos->insert(pos->begin(), mode);
   pos->insert(pos->begin(), k);
   pos->insert(pos->begin(), n);
