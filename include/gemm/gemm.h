@@ -301,6 +301,7 @@ index_t gemm(char transa, char transb, index_t m, index_t n, index_t k, T alpha,
   }
   std::free(c_t_mat);
 #endif  // __AVX512F__
+  return 1;
 }
 
 #endif  // __GEMM_H_

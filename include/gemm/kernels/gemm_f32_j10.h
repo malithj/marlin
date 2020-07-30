@@ -100,6 +100,7 @@ inline index_t gemm_f32_j10(char transa, char transb, index_t m, index_t n,
   _mm512_mask_i32scatter_ps(c_ptr, mask, zmm1, czmm24, 0x4);
   c_ptr++;
   _mm512_mask_i32scatter_ps(c_ptr, mask, zmm1, czmm25, 0x4);
+  return 1;
 }
 
 #endif

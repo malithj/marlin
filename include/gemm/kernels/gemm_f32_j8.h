@@ -59,7 +59,6 @@ inline index_t gemm_f32_j8(char transa, char transb, index_t m, index_t n,
     __m512 bzmm6 = _mm512_set1_ps(*(b_ptr + 5));
     __m512 bzmm7 = _mm512_set1_ps(*(b_ptr + 6));
     __m512 bzmm8 = _mm512_set1_ps(*(b_ptr + 7));
-    __m512 bzmm9 = _mm512_set1_ps(*(b_ptr + 8));
 
     czmm16 = _mm512_fmadd_ps(azmm0, bzmm1, czmm16);
     czmm17 = _mm512_fmadd_ps(azmm0, bzmm2, czmm17);
@@ -89,6 +88,7 @@ inline index_t gemm_f32_j8(char transa, char transb, index_t m, index_t n,
   _mm512_mask_i32scatter_ps(c_ptr, mask, zmm1, czmm22, 0x4);
   c_ptr++;
   _mm512_mask_i32scatter_ps(c_ptr, mask, zmm1, czmm23, 0x4);
+  return 1;
 }
 
 #endif
