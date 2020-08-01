@@ -6,7 +6,7 @@
 # 15 B COLS AND 1 A COLS.
 #
 # CALLING SEQUENCE IS AS FOLLOWS:
-#		RDI : K
+#       RDI : K
 #       RSI : MATRIX A PTR
 #       RDX : MATRIX C PTR
 #       RCX : BASE PAGE ADDRESS
