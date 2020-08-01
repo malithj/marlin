@@ -192,7 +192,6 @@ asm_gemm:
     movq $0x1, %rax                          # SET RETURN VALUE
     # FUNCTION BODY ENDS
     # DEALLOCATE STACK SPACE
-    movq %r12, %rax
     movq  -0x10(%rbp), %r12                   # [SAVE R12 REG FROM STACK]
     movq  -0x18(%rbp), %r13                   # [SAVE R13 REG FROM STACK]
     addq $0x20, %rsp
