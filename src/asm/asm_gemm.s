@@ -30,7 +30,7 @@ asm_gemm:
     pushq %rbp              
     movq %rsp, %rbp
     # ALLOCATE STACK SPACE
-    subq $0x20, %rsp                         # [STACK ALLOCATE 32 BYTES]
+    subq $0x28, %rsp                         # [STACK ALLOCATE 32 BYTES]
     # FUNCTION BODY
     vxorps %zmm0, %zmm0, %zmm0               # SET SRC REGISTER TO ZERO
     movq 0x10(%rbp), %r10                    # GATHER INDICES
@@ -38,6 +38,7 @@ asm_gemm:
     movq %rdx, -0x8(%rbp)                    # [SAVE C MATRIX PTR TO STACK]
     movq %r12, -0x10(%rbp)                   # [SAVE R12 REG TO STACK]
     movq %r13, -0x18(%rbp)                   # [SAVE R13 REG TO STACK]
+    movq %r14, -0x20(%rbp)                   # [SAVE R14 REG TO STACK]
 
     vmovaps %zmm0, %zmm2                     # COPY SRC REGISTER TO FUTURE C0 
     movzwl 0x18(%rbp), %r11d                 # LD MASK FROM STACK  [SCRBL: r11]
@@ -192,9 +193,10 @@ asm_gemm:
     movq $0x1, %rax                          # SET RETURN VALUE
     # FUNCTION BODY ENDS
     # DEALLOCATE STACK SPACE
-    movq  -0x10(%rbp), %r12                   # [SAVE R12 REG FROM STACK]
-    movq  -0x18(%rbp), %r13                   # [SAVE R13 REG FROM STACK]
-    addq $0x20, %rsp
+    movq  -0x10(%rbp), %r12                  # [SAVE R12 REG FROM STACK]
+    movq  -0x18(%rbp), %r13                  # [SAVE R13 REG FROM STACK]
+    movq  -0x20(%rbp), %r14                  # [SAVE R14 REG FROM STACK]
+    addq $0x28, %rsp
     # FUNCTION EPILOG BEGINS HERE
     movq %rbp, %rsp        
     pop %rbp
