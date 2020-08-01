@@ -140,7 +140,56 @@ asm_gemm:
     jmp .LOOPBEGIN
     # LOOP CLEANUP END
 .LOOPEXIT:
-    vmovups %zmm25, (%rdx)                   # TEST LINE: REMOVE (STORE C)
+    vxorps %zmm0, %zmm0, %zmm0               # SET SRC REGISTER TO ZERO
+    movq -0x8(%rbp), %rdx                    # [RESTORE C MATRIX PTR TO STACK]
+    # vmovups %zmm2, (%rdx)                    # TEST LINE: REMOVE (STORE C)
+    movq 0x10(%rbp), %r10                    # GATHER INDICES
+    vmovdqu32 (%r10), %zmm1                  # LD C MATRIX INDICES [DSTRYBL:r10]
+    kmovw  %r11d, %k1                        # SET MASK
+    vscatterdps %zmm2, (%rdx, %zmm1, 0x4){%k1} 
+    lea 0x4(%rdx), %rdx                      # INCREMENT C MATRIX PTR
+    kmovw  %r11d, %k1                        # SET MASK
+    vscatterdps %zmm3, (%rdx, %zmm1, 0x4){%k1} 
+    lea 0x4(%rdx), %rdx                      # INCREMENT C MATRIX PTR
+    kmovw  %r11d, %k1                        # SET MASK
+    vscatterdps %zmm4, (%rdx, %zmm1, 0x4){%k1} 
+    lea 0x4(%rdx), %rdx                      # INCREMENT C MATRIX PTR
+    kmovw  %r11d, %k1                        # SET MASK
+    vscatterdps %zmm5, (%rdx, %zmm1, 0x4){%k1} 
+    lea 0x4(%rdx), %rdx                      # INCREMENT C MATRIX PTR
+    kmovw  %r11d, %k1                        # SET MASK
+    vscatterdps %zmm6, (%rdx, %zmm1, 0x4){%k1} 
+    lea 0x4(%rdx), %rdx                      # INCREMENT C MATRIX PTR
+    kmovw  %r11d, %k1                        # SET MASK
+    vscatterdps %zmm7, (%rdx, %zmm1, 0x4){%k1} 
+    lea 0x4(%rdx), %rdx                      # INCREMENT C MATRIX PTR
+    kmovw  %r11d, %k1                        # SET MASK
+    vscatterdps %zmm8, (%rdx, %zmm1, 0x4){%k1} 
+    lea 0x4(%rdx), %rdx                      # INCREMENT C MATRIX PTR
+    kmovw  %r11d, %k1                        # SET MASK
+    vscatterdps %zmm9, (%rdx, %zmm1, 0x4){%k1} 
+    lea 0x4(%rdx), %rdx                      # INCREMENT C MATRIX PTR
+    kmovw  %r11d, %k1                        # SET MASK
+    vscatterdps %zmm10, (%rdx, %zmm1, 0x4){%k1} 
+    lea 0x4(%rdx), %rdx                      # INCREMENT C MATRIX PTR
+    kmovw  %r11d, %k1                        # SET MASK
+    vscatterdps %zmm11, (%rdx, %zmm1, 0x4){%k1} 
+    lea 0x4(%rdx), %rdx                      # INCREMENT C MATRIX PTR
+    kmovw  %r11d, %k1                        # SET MASK
+    vscatterdps %zmm12, (%rdx, %zmm1, 0x4){%k1} 
+    lea 0x4(%rdx), %rdx                      # INCREMENT C MATRIX PTR
+    kmovw  %r11d, %k1                        # SET MASK
+    vscatterdps %zmm13, (%rdx, %zmm1, 0x4){%k1} 
+    lea 0x4(%rdx), %rdx                      # INCREMENT C MATRIX PTR
+    kmovw  %r11d, %k1                        # SET MASK
+    vscatterdps %zmm14, (%rdx, %zmm1, 0x4){%k1} 
+    lea 0x4(%rdx), %rdx                      # INCREMENT C MATRIX PTR
+    kmovw  %r11d, %k1                        # SET MASK
+    vscatterdps %zmm15, (%rdx, %zmm1, 0x4){%k1} 
+    lea 0x4(%rdx), %rdx                      # INCREMENT C MATRIX PTR
+    kmovw  %r11d, %k1                        # SET MASK
+    vscatterdps %zmm16, (%rdx, %zmm1, 0x4){%k1} 
+    movq $0x1, %rax                          # SET RETURN VALUE
     # FUNCTION BODY ENDS
     # DEALLOCATE STACK SPACE
     movq %r12, %rax
