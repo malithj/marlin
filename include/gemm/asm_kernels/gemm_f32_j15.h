@@ -9,25 +9,11 @@
 #include "../../jit/jitter.h"
 #include "../../types/types.h"
 
-inline index_t gemm_f32_j15(char transa, char transb, index_t m, index_t n,
-                            index_t k, float alpha, float* a, index_t lda,
-                            float* b, index_t ldb, float beta, float* c,
-                            index_t ldc, std::shared_ptr<Jitter<float>> jitter,
-                            index_t idx) {
-  uint32_t arr_a[16];
-  for (uint32_t i = 0; i < 16; ++i) {
-    arr_a[i] = i * lda;
-  }
-  uint32_t arr_c[16];
-  for (uint32_t i = 0; i < 16; ++i) {
-    arr_c[i] = i * ldc;
-  }
-
-  // load m rows
-  uint16_t mask = ~(0xffff << m);
-
+inline index_t gemm_f32_j15(index_t k, float* a, float* c, void* p_addr,
+                            index_t* offset_data, uint32_t* arr_a,
+                            uint32_t* arr_c, uint16_t mask, index_t idx) {
   __m512 zmm0 = _mm512_setzero_ps();
-  __m512i zmm1 = _mm512_loadu_si512(&arr_c);
+  __m512i zmm1 = _mm512_loadu_si512(arr_c);
   float* c_ptr = c;
 
   __m512 czmm16 = _mm512_mask_i32gather_ps(zmm0, mask, zmm1, c_ptr, 0x4);
@@ -60,13 +46,17 @@ inline index_t gemm_f32_j15(char transa, char transb, index_t m, index_t n,
   c_ptr++;
   __m512 czmm30 = _mm512_mask_i32gather_ps(zmm0, mask, zmm1, c_ptr, 0x4);
 
-  zmm1 = _mm512_loadu_si512(&arr_a);
+  zmm1 = _mm512_loadu_si512(arr_a);
   for (index_t kk = 0; kk < k; kk += 1) {
     float* a_ptr = a + kk;
     __m512 azmm0 = _mm512_mask_i32gather_ps(zmm0, mask, zmm1, a_ptr, 0x4);
 
     // load n B columns
-    jitter->execute(idx++);
+    void (*execute_function)();
+    index_t offset = offset_data[idx++];
+    execute_function = reinterpret_cast<void (*)()>(
+        static_cast<unsigned char*>(p_addr) + offset);
+    execute_function();
 
     __asm__ __volatile__(
         "vmovaps %[azmm], %%zmm0\n\t"
@@ -123,21 +113,21 @@ inline index_t gemm_f32_j15(char transa, char transb, index_t m, index_t n,
         [ czmm12 ] "v"(czmm28), [ czmm13 ] "v"(czmm29), [ czmm14 ] "v"(czmm30));
 
     __asm__ __volatile__(
-        "vmovaps %%zmm1, %[_czmm0]\n\t"
-        "vmovaps %%zmm2, %[_czmm1]\n\t"
-        "vmovaps %%zmm3, %[_czmm2]\n\t"
-        "vmovaps %%zmm4, %[_czmm3]\n\t"
-        "vmovaps %%zmm5, %[_czmm4]\n\t"
-        "vmovaps %%zmm6, %[_czmm5]\n\t"
-        "vmovaps %%zmm7, %[_czmm6]\n\t"
-        "vmovaps %%zmm8, %[_czmm7]\n\t"
-        "vmovaps %%zmm9, %[_czmm8]\n\t"
-        "vmovaps %%zmm10, %[_czmm9]\n\t"
-        "vmovaps %%zmm11, %[_czmm10]\n\t"
-        "vmovaps %%zmm12, %[_czmm11]\n\t"
-        "vmovaps %%zmm13, %[_czmm12]\n\t"
-        "vmovaps %%zmm14, %[_czmm13]\n\t"
-        "vmovaps %%zmm15, %[_czmm14]\n\t"
+        "vmovaps %%zmm1, %[czmm0]\n\t"
+        "vmovaps %%zmm2, %[czmm1]\n\t"
+        "vmovaps %%zmm3, %[czmm2]\n\t"
+        "vmovaps %%zmm4, %[czmm3]\n\t"
+        "vmovaps %%zmm5, %[czmm4]\n\t"
+        "vmovaps %%zmm6, %[czmm5]\n\t"
+        "vmovaps %%zmm7, %[czmm6]\n\t"
+        "vmovaps %%zmm8, %[czmm7]\n\t"
+        "vmovaps %%zmm9, %[czmm8]\n\t"
+        "vmovaps %%zmm10, %[czmm9]\n\t"
+        "vmovaps %%zmm11, %[czmm10]\n\t"
+        "vmovaps %%zmm12, %[czmm11]\n\t"
+        "vmovaps %%zmm13, %[czmm12]\n\t"
+        "vmovaps %%zmm14, %[czmm13]\n\t"
+        "vmovaps %%zmm15, %[czmm14]\n\t"
         :
         [ czmm0 ] "=v"(czmm16), [ czmm1 ] "=v"(czmm17), [ czmm2 ] "=v"(czmm18),
         [ czmm3 ] "=v"(czmm19), [ czmm4 ] "=v"(czmm20), [ czmm5 ] "=v"(czmm21),
@@ -149,7 +139,7 @@ inline index_t gemm_f32_j15(char transa, char transb, index_t m, index_t n,
         :);
   }
 
-  zmm1 = _mm512_loadu_si512(&arr_c);
+  zmm1 = _mm512_loadu_si512(arr_c);
 
   c_ptr = c;
   _mm512_mask_i32scatter_ps(c_ptr, mask, zmm1, czmm16, 0x4);

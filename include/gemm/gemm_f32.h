@@ -213,8 +213,9 @@ inline index_t sgemm(char transa, char transb, index_t m, index_t n, index_t k,
       b_ptr = b + j;
       c_ptr = c + i * n + j;
 #ifdef ENABLE_JIT
-      gemm_f32_j15('N', 'N', 0x10, 0xf, k, 1, a_ptr, k, b_ptr, n, 0, c_ptr, n,
-                   jitter, idx);
+      gemm_f32_j15(k, a_ptr, c_ptr, jitter->get_p_addr(),
+                   jitter->get_offset_data(), jitter->get_a_offsets(),
+                   jitter->get_c_offsets(), jitter->get_mask(), idx);
 #else
       gemm_f32_j15('N', 'N', 0x10, 0xf, k, 1, a_ptr, k, b_ptr, n, 0, c_ptr, n);
 #endif
@@ -231,8 +232,9 @@ inline index_t sgemm(char transa, char transb, index_t m, index_t n, index_t k,
       b_ptr = b + j;
       c_ptr = c + ftile_i_lim * n + j;
 #ifdef ENABLE_JIT
-      gemm_f32_j15('N', 'N', ptile_i_remain, 0xf, k, 1, a_ptr, k, b_ptr, n, 0,
-                   c_ptr, n, jitter, idx);
+      gemm_f32_j15(k, a_ptr, c_ptr, jitter->get_p_addr(),
+                   jitter->get_offset_data(), jitter->get_a_offsets(),
+                   jitter->get_c_offsets(), jitter->get_pmask(), idx);
 #else
       gemm_f32_j15('N', 'N', ptile_i_remain, 0xf, k, 1, a_ptr, k, b_ptr, n, 0,
                    c_ptr, n);
