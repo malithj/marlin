@@ -113,11 +113,13 @@ asm_gemm:
     kmovw  %r11d, %k1                        # SET MASK
     vgatherdps (%rsi, %zmm1, 4), %zmm0{%k1}  # LOAD A COL TO REGISTER
                                              # SET MATRIX B
-    lea (%r8, %r10, 0x4), %r12               # OFFSET
+    movl %eax, %r14d                         # CALLER SAVE
+    lea (%r8, %r10, 0x8), %r12               # OFFSET
     movq (%r12), %r12
     movq %rcx, %r13                          # MOV BASE PAGE ADDRESS
     addq %r12, %r13                          # CALLABLE ADDRESS
     callq *%r13                              # CALL FUNCTION TO SET MAT B
+    movl %r14d, %eax                         # CALLER RESTORE
     # MATMUL
     vfmadd231ps %zmm0, %zmm31, %zmm2         # z2 += z0 * z31
     vfmadd231ps %zmm0, %zmm30, %zmm3         # z3 += z0 * z30
