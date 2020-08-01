@@ -15,6 +15,8 @@
 #include "../log/logging.h"
 #include "../mem/memory.h"
 #include "../types/types.h"
+#include "byte_code.h"
+#include "codelet.h"
 
 using namespace Logging::LoggingInternals;
 
@@ -46,9 +48,8 @@ class CodeStore {
   size_t get_code_size_broadcast_b_matrix(T* b_matrix, size_t num_elements);
   size_t get_code_size_gemm_b_matrix(T* b_matrix, size_t k, size_t n);
   // generate instructions for B matrix
-  std::tuple<std::shared_ptr<std::vector<unsigned char>>,
-             std::shared_ptr<std::vector<index_t>>>
-  generate_b_matrix(T* b_matrix, size_t k, size_t n);
+  void generate_b_matrix(T* b_matrix, size_t k, size_t n,
+                         std::shared_ptr<ByteCode> bytecode);
   // store code and offset to file
   void tofile(std::string& filename,
               std::tuple<std::shared_ptr<std::vector<unsigned char>>,
@@ -60,9 +61,8 @@ class CodeStore {
   std::shared_ptr<std::vector<index_t>> get_codelet_pos();
   // Copy the code from the provided vector containing unsigned char bytes to
   // a virtual page obtained by the OS. Set the appropriate permissions
-  void copy_code_to_execution_space(
-      std::shared_ptr<std::vector<unsigned char>> hex_ins,
-      std::shared_ptr<std::vector<index_t>> pos);
+  void copy_code_to_execution_space(std::shared_ptr<ByteCode> input,
+                                    std::shared_ptr<Codelet> output);
   // execute the code
   bool execute(T* ptr);
   bool fast_execute(index_t offset);
@@ -142,34 +142,35 @@ std::shared_ptr<std::vector<index_t>> CodeStore<T>::get_codelet_pos() {
 }
 
 template <typename T>
-std::tuple<std::shared_ptr<std::vector<unsigned char>>,
-           std::shared_ptr<std::vector<index_t>>>
-CodeStore<T>::generate_b_matrix(T* b_matrix, size_t k, size_t n) {
+void CodeStore<T>::generate_b_matrix(T* b_matrix, size_t k, size_t n,
+                                     std::shared_ptr<ByteCode> bytecode) {
   size_t num_zeros = 0;
   for (index_t i = 0; i < k * n; ++i) {
     if (b_matrix[i] == 0) num_zeros++;
   }
+
+  // full tile bounding limit
+  const index_t ftile_j_lim = (n / 15) * 15;
+  // partial tile bounding limit
+  const index_t ptile_j_remain = n - ftile_j_lim;
+
+  const index_t b_cols = 15;
+  const index_t a_cols = 1;
   const index_t total_code_size = get_code_size_gemm_b_matrix(b_matrix, k, n);
+  const index_t total_iterations = (ftile_j_lim / 15) * k + k + 1;
 
   // define a vector to store generated B matrix code until transferred
   // to page memory
-  std::shared_ptr<std::vector<unsigned char>> code =
-      std::make_shared<std::vector<unsigned char>>(total_code_size);
-  std::shared_ptr<std::vector<index_t>> track =
-      std::make_shared<std::vector<index_t>>();
+  bytecode->get_code_buffer()->resize(total_code_size);
+  unsigned char* dest_ptr = bytecode->get_code_buffer()->mutable_data();
 
-  // full tile bounding limit
-  index_t ftile_j_lim = (n / 15) * 15;
-  // partial tile bounding limit
-  index_t ptile_j_remain = n - ftile_j_lim;
-
-  index_t b_cols = 15;
-  index_t a_cols = 1;
+  bytecode->get_offset_buffer()->resize(total_iterations);
+  index_t* track = bytecode->get_offset_buffer()->mutable_data();
 
   T* buffer = static_cast<T*>(aligned_alloc(b_cols * a_cols, sizeof(T)));
-  unsigned char* dest_ptr = code->data();
-
   index_t tally_code_size = 0;
+  index_t idx = 0;
+  track[idx++] = 0;
   // generate b matrix code
   for (index_t jj = 0; jj < ftile_j_lim; jj += b_cols) {
     for (index_t kk = 0; kk < k; ++kk) {
@@ -179,7 +180,7 @@ CodeStore<T>::generate_b_matrix(T* b_matrix, size_t k, size_t n) {
                              b_cols * a_cols);
       tally_code_size +=
           get_code_size_broadcast_b_matrix(buffer, b_cols * a_cols);
-      track->push_back(tally_code_size);
+      track[idx++] = tally_code_size;
     }
   }
 
@@ -192,7 +193,7 @@ CodeStore<T>::generate_b_matrix(T* b_matrix, size_t k, size_t n) {
                              ptile_j_remain);
       tally_code_size +=
           get_code_size_broadcast_b_matrix(buffer, ptile_j_remain);
-      track->push_back(tally_code_size);
+      track[idx++] = tally_code_size;
     }
   }
 
@@ -204,7 +205,6 @@ CodeStore<T>::generate_b_matrix(T* b_matrix, size_t k, size_t n) {
         " actual: " + std::to_string(tally_code_size));
   }
   aligned_free(buffer);
-  return std::make_tuple(code, track);
 }
 
 template <typename T>
@@ -231,6 +231,7 @@ size_t CodeStore<T>::get_code_size_gemm_b_matrix(T* b_matrix, size_t k,
   for (index_t i = 0; i < k * n; ++i) {
     if (b_matrix[i] == 0) num_zeros++;
   }
+
   LOG_DEBUG("sub codelet b size: " + std::to_string(sc_size));
   LOG_DEBUG("sub codelet bz size: " + std::to_string(sc_z_size));
   LOG_DEBUG("number of zeros in B: " + std::to_string(num_zeros));
@@ -243,7 +244,8 @@ size_t CodeStore<T>::get_code_size_gemm_b_matrix(T* b_matrix, size_t k,
 
   const index_t full_tile_code =
       (elems_per_full_tile * sc_size + 1) * num_full_tiles * k;
-  const index_t partial_tile_code = (ptile_j_remain * sc_size + 1) * k;
+  const index_t partial_tile_code =
+      ptile_j_remain > 0 ? (ptile_j_remain * sc_size + 1) * k : 0;
   const index_t zero_optimized_code = num_zeros * (sc_size - sc_z_size);
 
   const index_t total_code_size =
@@ -257,9 +259,9 @@ size_t CodeStore<T>::get_code_size_gemm_b_matrix(T* b_matrix, size_t k,
 // set as (0,0). This key can be used to execute by default.
 template <typename T>
 void CodeStore<T>::copy_code_to_execution_space(
-    std::shared_ptr<std::vector<unsigned char>> hex_ins,
-    std::shared_ptr<std::vector<index_t>> pos) {
-  const size_t size_of_pages_bytes = get_required_num_pages(hex_ins->size());
+    std::shared_ptr<ByteCode> input, std::shared_ptr<Codelet> output) {
+  const size_t size_of_pages_bytes =
+      get_required_num_pages(input->get_code_buffer()->size());
 
   // If addr is null, kernel chooses where to create the mapping. else kernel
   // takes a hint as to where memory mapping should be created.
@@ -301,7 +303,8 @@ void CodeStore<T>::copy_code_to_execution_space(
   }
 
   // copy the instruction bytes to the virtual memory page
-  std::memcpy(p_addr, hex_ins->data(), hex_ins->size());
+  std::memcpy(p_addr, input->get_code_buffer()->raw_data(),
+              input->get_code_buffer()->size());
 
   // change page permissions now data has been copied
   int mresult = mprotect(p_addr, size_of_pages_bytes, PROT_READ | PROT_EXEC);
@@ -309,12 +312,7 @@ void CodeStore<T>::copy_code_to_execution_space(
     throw std::runtime_error("Cannot dynamically allocated page memory");
   }
 
-  this->page_size_bytes_allocated = size_of_pages_bytes;
-  this->p_addr = p_addr;
-  pos->insert(pos->begin(), static_cast<index_t>(0));
-  this->codelet_pos = pos;
-  // deprecated: original method call followed
-  // create_codelet_indexing(pos);
+  output->set_page_meta(p_addr, size_of_pages_bytes);
 }
 
 // This is a deprecated method. Used to verify the accuracy
