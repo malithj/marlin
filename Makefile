@@ -20,6 +20,7 @@ RESET_COLOR=\033[0m
 
 # object file names
 ASM_GEMM_O=asm_gemm.o
+ASM_TRANSPOSE_O=asm_transpose.o
 MAIN_O=main.o
 ODIR=$(BUILD_DIR)/bin
 TEST_O=test.o
