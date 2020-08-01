@@ -3,8 +3,8 @@
 #include "gemm/gemm.h"
 #include "gtest/gtest.h"
 
-extern "C" index_t asm_gemm(float *A, float *B, float *C, float *A_T,
-                            float *C_T, index_t m, index_t n, index_t k);
+extern "C" index_t asm_transpose(float *A, float *B, float *C, float *A_T,
+                                 float *C_T, index_t m, index_t n, index_t k);
 
 TEST(GEMM, CPP) {
   index_t m = 10;
@@ -79,7 +79,7 @@ TEST(GEMM, ASM) {
   }
   memset(A_T, 0, sizeof(float) * m * k);
 
-  asm_gemm(A, B, C, A_T, C_T, m, n, k);
+  asm_transpose(A, B, C, A_T, C_T, m, n, k);
 
   std::free(A);
   std::free(B);

@@ -35,6 +35,7 @@ TEST_SCATTER_O=test_scatter.o
 
 # create object files in binary directory
 ASM_GEMM=$(patsubst %,$(ODIR)/%,$(ASM_GEMM_O))
+ASM_TRANSPOSE=$(patsubst %,$(ODIR)/%,$(ASM_TRANSPOSE_O))
 MAIN=$(patsubst %,$(ODIR)/%,$(MAIN_O))
 OUT_DIR=$(ODIR)
 TEST=$(patsubst %,$(ODIR)/%,$(TEST_O))

@@ -16,14 +16,15 @@
 # 0x18(EBP) : K
 #	
 # FUNCTION DEFINITION TO BE DECLARED IS AS FOLLOWS:
-#       extern "C" float asm_gemm(float *A, float *B, float *C, float *A_T,
-#                                 float *C_T index_t m, index_t n, index_t k);
+#       extern "C" float asm_transpose(float *A, float *B, float *C, float *A_T,
+#                                      float *C_T index_t m, index_t n,
+#                                      index_t k);
 #                        
 #
 
-.global asm_gemm
+.global asm_transpose
     .text
-asm_gemm:
+asm_transpose:
     # FUNCTION PRELOG BEGINS HERE
     pushq %rbp              
     movq %rsp, %rbp
