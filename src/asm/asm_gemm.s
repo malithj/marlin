@@ -17,9 +17,9 @@
 # 0x20(EBP) : B MATRIX IDX (CODE GEN INVOKER IDX)
 #
 # FUNCTION DEFINITION TO BE DECLARED IS AS FOLLOWS:
-#       extern "C" float asm_gemm(index_t k, float* a, float* c, void* p_addr,
-#                                 index_t* offset_data, uint32_t* arr_a,
-#                                 uint32_t* arr_c, uint16_t mask, index_t idx);
+#       extern "C" index_t asm_gemm(index_t k, float* a, float* c, void* p_addr,
+#                                   index_t* offset_data, uint32_t* arr_a,
+#                                   uint32_t* arr_c, uint16_t mask, index_t idx)
 #                        
 #
 
