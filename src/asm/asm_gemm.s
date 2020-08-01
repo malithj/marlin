@@ -117,6 +117,22 @@ asm_gemm:
     movq %rcx, %r13                          # MOV BASE PAGE ADDRESS
     addq %r12, %r13                          # CALLABLE ADDRESS
     callq *%r13                              # CALL FUNCTION TO SET MAT B
+    # MATMUL
+    vfmadd231ps %zmm0, %zmm31, %zmm2         # z2 += z0 * z31
+    vfmadd231ps %zmm0, %zmm30, %zmm3         # z3 += z0 * z30
+    vfmadd231ps %zmm0, %zmm29, %zmm4         # z4 += z0 * z29
+    vfmadd231ps %zmm0, %zmm28, %zmm5         # z5 += z0 * z28
+    vfmadd231ps %zmm0, %zmm27, %zmm6         # z6 += z0 * z27
+    vfmadd231ps %zmm0, %zmm26, %zmm7         # z7 += z0 * z26
+    vfmadd231ps %zmm0, %zmm25, %zmm8         # z8 += z0 * z25
+    vfmadd231ps %zmm0, %zmm24, %zmm9         # z9 += z0 * z24
+    vfmadd231ps %zmm0, %zmm23, %zmm10        # z10 += z0 * z23
+    vfmadd231ps %zmm0, %zmm22, %zmm11        # z11 += z0 * z22
+    vfmadd231ps %zmm0, %zmm21, %zmm12        # z12 += z0 * z21
+    vfmadd231ps %zmm0, %zmm20, %zmm13        # z13 += z0 * z20
+    vfmadd231ps %zmm0, %zmm19, %zmm14        # z14 += z0 * z19
+    vfmadd231ps %zmm0, %zmm18, %zmm15        # z15 += z0 * z18
+    vfmadd231ps %zmm0, %zmm17, %zmm16        # z16 += z0 * z17
     # LOOP CLEANUP
     lea 0x4(%rsi), %rsi                      # INCREMENT A MATRIX PTR
     addl $1, %eax                            # i = i + 1
