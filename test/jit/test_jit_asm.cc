@@ -11,7 +11,7 @@ extern "C" index_t asm_gemm(index_t k, float *a, float *c, void *p_addr,
 TEST(JIT, ASM_GEMM) {
   index_t m = 16;
   index_t n = 15;
-  index_t k = 1;
+  index_t k = 10;
   index_t idx = 0;
 
   float *A = static_cast<float *>(std::malloc(m * k * sizeof(float)));
@@ -37,27 +37,19 @@ TEST(JIT, ASM_GEMM) {
     }
   }
 
-  memset(C, 0, m * n * sizeof(float));
-  for (index_t i = 0; i < m; ++i) {
-    for (index_t j = 0; j < n; ++j) {
-      C[i * n + j] = j;
-    }
-  }
-
   // generate code
   std::shared_ptr<Jitter<float>> jitter = std::make_shared<Jitter<float>>();
   jitter->generate_code(B, m, k, n);
+
+  memset(C, 0, m * n * sizeof(float));
   memset(C_REF, 0, m * n * sizeof(float));
   gemm<float>('N', 'N', m, n, k, 1.0, A, k, B, n, 0, C_REF, n);
-  float x = asm_gemm(k, A, C, jitter->get_p_addr(), jitter->get_offset_data(),
-                     jitter->get_a_offsets(), jitter->get_c_offsets(),
-                     jitter->get_mask(), idx);
-  std::cout << x << std::endl;
-  for (index_t i = 0; i < m; ++i) {
-    for (index_t j = 0; j < n; ++j) {
-      std::cout << C[i * n + j] << " ";
-    }
-    std::cout << "" << std::endl;
+  asm_gemm(k, A, C, jitter->get_p_addr(), jitter->get_offset_data(),
+           jitter->get_a_offsets(), jitter->get_c_offsets(), jitter->get_mask(),
+           idx);
+
+  for (index_t i = 0; i < m * n; ++i) {
+    EXPECT_EQ(C_REF[i], C[i]);
   }
 
   std::free(A);
