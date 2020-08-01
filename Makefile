@@ -55,7 +55,7 @@ all: $(OUT_DIR) $(GOOGLE_TEST) $(TARGET)
 	@echo "${LINE_COLOR}Finished building target: $^${RESET_COLOR}" 
 	@echo "${RESET_COLOR}"
 
-$(ASM_GEMM): $(SRC_DIR)/asm/gemm.s
+$(ASM_TRANSPOSE): $(SRC_DIR)/asm/asm_transpose.s
 	@echo "${LINE_COLOR}Building object file: $@${RESET_COLOR}"
 	@echo -n "${CMD_COLOR}"
 	$(CC) -o $@ -c $^
