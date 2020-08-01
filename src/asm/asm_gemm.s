@@ -30,7 +30,7 @@ asm_gemm:
     pushq %rbp              
     movq %rsp, %rbp
     # ALLOCATE STACK SPACE
-    subq $0x80, %rsp                         # [STACK ALLOCATE 128 BYTES]
+    subq $0x20, %rsp                         # [STACK ALLOCATE 32 BYTES]
     # FUNCTION BODY
     vxorps %zmm0, %zmm0, %zmm0               # SET SRC REGISTER TO ZERO
     movq 0x10(%rbp), %r10                    # GATHER INDICES
@@ -130,7 +130,7 @@ asm_gemm:
     movq %r12, %rax
     movq  -0x10(%rbp), %r12                   # [SAVE R12 REG FROM STACK]
     movq  -0x18(%rbp), %r13                   # [SAVE R13 REG FROM STACK]
-    addq $0x80, %rsp
+    addq $0x20, %rsp
     # FUNCTION EPILOG BEGINS HERE
     movq %rbp, %rsp        
     pop %rbp
