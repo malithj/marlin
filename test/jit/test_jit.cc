@@ -2,6 +2,7 @@
 #include "jit/jitter.h"
 
 TEST(JIT, Code) {
+  const index_t m = 32;
   const index_t k = 32;
   const index_t n = 32;
   float* b_matrix = static_cast<float*>(aligned_alloc(k * n, sizeof(float)));
@@ -14,7 +15,7 @@ TEST(JIT, Code) {
   }
 
   Jitter<float> jitter;
-  jitter.generate_code(b_matrix, k, n);
+  jitter.generate_code(b_matrix, m, k, n);
   float* buffer_out =
       static_cast<float*>(aligned_alloc(15 * 16, sizeof(float)));
   index_t idx = 0;
