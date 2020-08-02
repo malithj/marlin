@@ -105,7 +105,7 @@ void Jitter<T>::generate_code(T* matrix, int m, int k, int n) {
   this->offset_data = this->bytecode->get_offset_buffer()->mutable_data();
   this->arr_a_offsets = new uint32_t[16];
   this->arr_c_offsets = new uint32_t[16];
-  this->mask = ~(0xffff << m);
+  this->mask = 0xffff;
   this->pmask = ~(0xffff << (m & 0xf));
 
   for (uint32_t i = 0; i < 16; ++i) {
