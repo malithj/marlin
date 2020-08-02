@@ -20,6 +20,18 @@ RESET_COLOR=\033[0m
 
 # object file names
 ASM_GEMM_O=asm_gemm.o
+ASM_GEMM_F32_J1_O=asm_gemm_f32_j1.o
+ASM_GEMM_F32_J2_O=asm_gemm_f32_j2.o
+ASM_GEMM_F32_J3_O=asm_gemm_f32_j3.o
+ASM_GEMM_F32_J4_O=asm_gemm_f32_j4.o
+ASM_GEMM_F32_J5_O=asm_gemm_f32_j5.o
+ASM_GEMM_F32_J6_O=asm_gemm_f32_j6.o
+ASM_GEMM_F32_J7_O=asm_gemm_f32_j7.o
+ASM_GEMM_F32_J8_O=asm_gemm_f32_j8.o
+ASM_GEMM_F32_J9_O=asm_gemm_f32_j9.o
+ASM_GEMM_F32_J10_O=asm_gemm_f32_j10.o
+ASM_GEMM_F32_J11_O=asm_gemm_f32_j11.o
+ASM_GEMM_F32_J12_O=asm_gemm_f32_j12.o
 ASM_GEMM_F32_J13_O=asm_gemm_f32_j13.o
 ASM_GEMM_F32_J14_O=asm_gemm_f32_j14.o
 ASM_TRANSPOSE_O=asm_transpose.o
@@ -40,6 +52,18 @@ TEST_SCATTER_O=test_scatter.o
 
 # create object files in binary directory
 ASM_GEMM=$(patsubst %,$(ODIR)/%,$(ASM_GEMM_O))
+ASM_GEMM_F32_J1=$(patsubst %,$(ODIR)/%,$(ASM_GEMM_F32_J1_O))
+ASM_GEMM_F32_J2=$(patsubst %,$(ODIR)/%,$(ASM_GEMM_F32_J2_O))
+ASM_GEMM_F32_J3=$(patsubst %,$(ODIR)/%,$(ASM_GEMM_F32_J3_O))
+ASM_GEMM_F32_J4=$(patsubst %,$(ODIR)/%,$(ASM_GEMM_F32_J4_O))
+ASM_GEMM_F32_J5=$(patsubst %,$(ODIR)/%,$(ASM_GEMM_F32_J5_O))
+ASM_GEMM_F32_J6=$(patsubst %,$(ODIR)/%,$(ASM_GEMM_F32_J6_O))
+ASM_GEMM_F32_J7=$(patsubst %,$(ODIR)/%,$(ASM_GEMM_F32_J7_O))
+ASM_GEMM_F32_J8=$(patsubst %,$(ODIR)/%,$(ASM_GEMM_F32_J8_O))
+ASM_GEMM_F32_J9=$(patsubst %,$(ODIR)/%,$(ASM_GEMM_F32_J9_O))
+ASM_GEMM_F32_J10=$(patsubst %,$(ODIR)/%,$(ASM_GEMM_F32_J10_O))
+ASM_GEMM_F32_J11=$(patsubst %,$(ODIR)/%,$(ASM_GEMM_F32_J11_O))
+ASM_GEMM_F32_J12=$(patsubst %,$(ODIR)/%,$(ASM_GEMM_F32_J12_O))
 ASM_GEMM_F32_J13=$(patsubst %,$(ODIR)/%,$(ASM_GEMM_F32_J13_O))
 ASM_GEMM_F32_J14=$(patsubst %,$(ODIR)/%,$(ASM_GEMM_F32_J14_O))
 ASM_TRANSPOSE=$(patsubst %,$(ODIR)/%,$(ASM_TRANSPOSE_O))
@@ -65,6 +89,78 @@ all: $(OUT_DIR) $(GOOGLE_TEST) $(TARGET)
 	@echo "${RESET_COLOR}"
 
 $(ASM_GEMM): $(SRC_DIR)/asm/asm_gemm.s
+	@echo "${LINE_COLOR}Building object file: $@${RESET_COLOR}"
+	@echo -n "${CMD_COLOR}"
+	$(CC) -o $@ -c $^
+	@echo "${RESET_COLOR}"
+
+$(ASM_GEMM_F32_J1): $(SRC_DIR)/asm/kernels/asm_gemm_f32_j1.s
+	@echo "${LINE_COLOR}Building object file: $@${RESET_COLOR}"
+	@echo -n "${CMD_COLOR}"
+	$(CC) -o $@ -c $^
+	@echo "${RESET_COLOR}"
+
+$(ASM_GEMM_F32_J2): $(SRC_DIR)/asm/kernels/asm_gemm_f32_j2.s
+	@echo "${LINE_COLOR}Building object file: $@${RESET_COLOR}"
+	@echo -n "${CMD_COLOR}"
+	$(CC) -o $@ -c $^
+	@echo "${RESET_COLOR}"
+
+$(ASM_GEMM_F32_J3): $(SRC_DIR)/asm/kernels/asm_gemm_f32_j3.s
+	@echo "${LINE_COLOR}Building object file: $@${RESET_COLOR}"
+	@echo -n "${CMD_COLOR}"
+	$(CC) -o $@ -c $^
+	@echo "${RESET_COLOR}"
+
+$(ASM_GEMM_F32_J4): $(SRC_DIR)/asm/kernels/asm_gemm_f32_j4.s
+	@echo "${LINE_COLOR}Building object file: $@${RESET_COLOR}"
+	@echo -n "${CMD_COLOR}"
+	$(CC) -o $@ -c $^
+	@echo "${RESET_COLOR}"
+
+$(ASM_GEMM_F32_J5): $(SRC_DIR)/asm/kernels/asm_gemm_f32_j5.s
+	@echo "${LINE_COLOR}Building object file: $@${RESET_COLOR}"
+	@echo -n "${CMD_COLOR}"
+	$(CC) -o $@ -c $^
+	@echo "${RESET_COLOR}"
+
+$(ASM_GEMM_F32_J6): $(SRC_DIR)/asm/kernels/asm_gemm_f32_j6.s
+	@echo "${LINE_COLOR}Building object file: $@${RESET_COLOR}"
+	@echo -n "${CMD_COLOR}"
+	$(CC) -o $@ -c $^
+	@echo "${RESET_COLOR}"
+
+$(ASM_GEMM_F32_J7): $(SRC_DIR)/asm/kernels/asm_gemm_f32_j7.s
+	@echo "${LINE_COLOR}Building object file: $@${RESET_COLOR}"
+	@echo -n "${CMD_COLOR}"
+	$(CC) -o $@ -c $^
+	@echo "${RESET_COLOR}"
+
+$(ASM_GEMM_F32_J8): $(SRC_DIR)/asm/kernels/asm_gemm_f32_j8.s
+	@echo "${LINE_COLOR}Building object file: $@${RESET_COLOR}"
+	@echo -n "${CMD_COLOR}"
+	$(CC) -o $@ -c $^
+	@echo "${RESET_COLOR}"
+
+$(ASM_GEMM_F32_J9): $(SRC_DIR)/asm/kernels/asm_gemm_f32_j9.s
+	@echo "${LINE_COLOR}Building object file: $@${RESET_COLOR}"
+	@echo -n "${CMD_COLOR}"
+	$(CC) -o $@ -c $^
+	@echo "${RESET_COLOR}"
+
+$(ASM_GEMM_F32_J10): $(SRC_DIR)/asm/kernels/asm_gemm_f32_j10.s
+	@echo "${LINE_COLOR}Building object file: $@${RESET_COLOR}"
+	@echo -n "${CMD_COLOR}"
+	$(CC) -o $@ -c $^
+	@echo "${RESET_COLOR}"
+
+$(ASM_GEMM_F32_J11): $(SRC_DIR)/asm/kernels/asm_gemm_f32_j11.s
+	@echo "${LINE_COLOR}Building object file: $@${RESET_COLOR}"
+	@echo -n "${CMD_COLOR}"
+	$(CC) -o $@ -c $^
+	@echo "${RESET_COLOR}"
+
+$(ASM_GEMM_F32_J12): $(SRC_DIR)/asm/kernels/asm_gemm_f32_j12.s
 	@echo "${LINE_COLOR}Building object file: $@${RESET_COLOR}"
 	@echo -n "${CMD_COLOR}"
 	$(CC) -o $@ -c $^
@@ -188,7 +284,7 @@ main: $(MAIN) $(VTUNE_LIB_DIR)/libjitprofiling.a
 	@echo "${RESET_COLOR}"
 	@echo "${LINE_COLOR}BUILD SUCCESSFUL${RESET_COLOR}"
 
-test: $(TEST) $(TEST_GEMM_KERNEL) $(TEST_GEMM_F32) $(TEST_JIT) $(TEST_JIT_ASM) $(TEST_JIT_GEMM) $(TEST_JIT_KERNEL) $(TEST_GATHER) $(TEST_SCATTER) $(TEST_TRANSPOSE) $(ASM_GEMM) $(ASM_GEMM_F32_J13) $(ASM_GEMM_F32_J14) $(ASM_TRANSPOSE) $(TEST_GEMM) $(TEST_GEMM_CUSTOM) $(BUILD_DIR)/$(GOOGLE_TEST)/lib/libgtest.a
+test: $(TEST) $(TEST_GEMM_KERNEL) $(TEST_GEMM_F32) $(TEST_JIT) $(TEST_JIT_ASM) $(TEST_JIT_GEMM) $(TEST_JIT_KERNEL) $(TEST_GATHER) $(TEST_SCATTER) $(TEST_TRANSPOSE) $(ASM_GEMM) $(ASM_GEMM_F32_J1) $(ASM_GEMM_F32_J2) $(ASM_GEMM_F32_J3) $(ASM_GEMM_F32_J4) $(ASM_GEMM_F32_J5) $(ASM_GEMM_F32_J6) $(ASM_GEMM_F32_J7) $(ASM_GEMM_F32_J8) $(ASM_GEMM_F32_J9) $(ASM_GEMM_F32_J10) $(ASM_GEMM_F32_J11) $(ASM_GEMM_F32_J12) $(ASM_GEMM_F32_J13) $(ASM_GEMM_F32_J14) $(ASM_TRANSPOSE) $(TEST_GEMM) $(TEST_GEMM_CUSTOM) $(BUILD_DIR)/$(GOOGLE_TEST)/lib/libgtest.a
 	@echo "${LINE_COLOR}Linking object file $@ with $^${RESET_COLOR}"
 	@echo -n "${CMD_COLOR}"
 	$(CC) -o $(BUILD_DIR)/$@ $^ $(TEST_FLAGS) -I $(INCLUDE_DIR) -I $(GOOGLE_TEST)/$(GOOGLE_TEST)/include -lpthread 
