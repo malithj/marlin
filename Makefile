@@ -20,6 +20,7 @@ RESET_COLOR=\033[0m
 
 # object file names
 ASM_GEMM_O=asm_gemm.o
+ASM_GEMM_F32_J13_O=asm_gemm_f32_j13.o
 ASM_GEMM_F32_J14_O=asm_gemm_f32_j14.o
 ASM_TRANSPOSE_O=asm_transpose.o
 MAIN_O=main.o
@@ -39,6 +40,7 @@ TEST_SCATTER_O=test_scatter.o
 
 # create object files in binary directory
 ASM_GEMM=$(patsubst %,$(ODIR)/%,$(ASM_GEMM_O))
+ASM_GEMM_F32_J13=$(patsubst %,$(ODIR)/%,$(ASM_GEMM_F32_J13_O))
 ASM_GEMM_F32_J14=$(patsubst %,$(ODIR)/%,$(ASM_GEMM_F32_J14_O))
 ASM_TRANSPOSE=$(patsubst %,$(ODIR)/%,$(ASM_TRANSPOSE_O))
 MAIN=$(patsubst %,$(ODIR)/%,$(MAIN_O))
@@ -63,6 +65,12 @@ all: $(OUT_DIR) $(GOOGLE_TEST) $(TARGET)
 	@echo "${RESET_COLOR}"
 
 $(ASM_GEMM): $(SRC_DIR)/asm/asm_gemm.s
+	@echo "${LINE_COLOR}Building object file: $@${RESET_COLOR}"
+	@echo -n "${CMD_COLOR}"
+	$(CC) -o $@ -c $^
+	@echo "${RESET_COLOR}"
+
+$(ASM_GEMM_F32_J13): $(SRC_DIR)/asm/kernels/asm_gemm_f32_j13.s
 	@echo "${LINE_COLOR}Building object file: $@${RESET_COLOR}"
 	@echo -n "${CMD_COLOR}"
 	$(CC) -o $@ -c $^
@@ -180,7 +188,7 @@ main: $(MAIN) $(VTUNE_LIB_DIR)/libjitprofiling.a
 	@echo "${RESET_COLOR}"
 	@echo "${LINE_COLOR}BUILD SUCCESSFUL${RESET_COLOR}"
 
-test: $(TEST) $(TEST_GEMM_KERNEL) $(TEST_GEMM_F32) $(TEST_JIT) $(TEST_JIT_ASM) $(TEST_JIT_GEMM) $(TEST_JIT_KERNEL) $(TEST_GATHER) $(TEST_SCATTER) $(TEST_TRANSPOSE) $(ASM_GEMM) $(ASM_GEMM_F32_J14) $(ASM_TRANSPOSE) $(TEST_GEMM) $(TEST_GEMM_CUSTOM) $(BUILD_DIR)/$(GOOGLE_TEST)/lib/libgtest.a
+test: $(TEST) $(TEST_GEMM_KERNEL) $(TEST_GEMM_F32) $(TEST_JIT) $(TEST_JIT_ASM) $(TEST_JIT_GEMM) $(TEST_JIT_KERNEL) $(TEST_GATHER) $(TEST_SCATTER) $(TEST_TRANSPOSE) $(ASM_GEMM) $(ASM_GEMM_F32_J13) $(ASM_GEMM_F32_J14) $(ASM_TRANSPOSE) $(TEST_GEMM) $(TEST_GEMM_CUSTOM) $(BUILD_DIR)/$(GOOGLE_TEST)/lib/libgtest.a
 	@echo "${LINE_COLOR}Linking object file $@ with $^${RESET_COLOR}"
 	@echo -n "${CMD_COLOR}"
 	$(CC) -o $(BUILD_DIR)/$@ $^ $(TEST_FLAGS) -I $(INCLUDE_DIR) -I $(GOOGLE_TEST)/$(GOOGLE_TEST)/include -lpthread 
