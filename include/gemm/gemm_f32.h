@@ -8,6 +8,7 @@
 
 #include "../types/types.h"
 #ifdef ENABLE_JIT
+#include "asm_kernels.h"
 #include "jit/jitter.h"
 #else
 #include "./kernels.h"
