@@ -54,66 +54,82 @@ inline index_t sgemm(char transa, char transb, index_t m, index_t n, index_t k,
   float* a_ptr;
   float* b_ptr;
   float* c_ptr;
-
 #ifdef ENABLE_JIT
   index_t idx = 0;
-  auto execute_kernel = [&](index_t ielem, index_t jelem) {
+#endif
+
+#ifdef ENABLE_JIT
+  auto execute_kernel = [&](uint16_t mask, index_t jelem) {
     switch (jelem) {
       case 1:
-        gemm_f32_j1('N', 'N', ielem, jelem, k, 1, a_ptr, k, b_ptr, n, 0, c_ptr,
-                    n);
+        asm_gemm_f32_j1(k, a_ptr, c_ptr, jitter->get_p_addr(),
+                        jitter->get_offset_data(), jitter->get_a_offsets(),
+                        jitter->get_c_offsets(), mask, idx);
         break;
       case 2:
-        gemm_f32_j2('N', 'N', ielem, jelem, k, 1, a_ptr, k, b_ptr, n, 0, c_ptr,
-                    n);
+        asm_gemm_f32_j2(k, a_ptr, c_ptr, jitter->get_p_addr(),
+                        jitter->get_offset_data(), jitter->get_a_offsets(),
+                        jitter->get_c_offsets(), mask, idx);
         break;
       case 3:
-        gemm_f32_j3('N', 'N', ielem, jelem, k, 1, a_ptr, k, b_ptr, n, 0, c_ptr,
-                    n);
+        asm_gemm_f32_j3(k, a_ptr, c_ptr, jitter->get_p_addr(),
+                        jitter->get_offset_data(), jitter->get_a_offsets(),
+                        jitter->get_c_offsets(), mask, idx);
         break;
       case 4:
-        gemm_f32_j4('N', 'N', ielem, jelem, k, 1, a_ptr, k, b_ptr, n, 0, c_ptr,
-                    n);
+        asm_gemm_f32_j4(k, a_ptr, c_ptr, jitter->get_p_addr(),
+                        jitter->get_offset_data(), jitter->get_a_offsets(),
+                        jitter->get_c_offsets(), mask, idx);
         break;
       case 5:
-        gemm_f32_j5('N', 'N', ielem, jelem, k, 1, a_ptr, k, b_ptr, n, 0, c_ptr,
-                    n);
+        asm_gemm_f32_j5(k, a_ptr, c_ptr, jitter->get_p_addr(),
+                        jitter->get_offset_data(), jitter->get_a_offsets(),
+                        jitter->get_c_offsets(), mask, idx);
         break;
       case 6:
-        gemm_f32_j6('N', 'N', ielem, jelem, k, 1, a_ptr, k, b_ptr, n, 0, c_ptr,
-                    n);
+        asm_gemm_f32_j6(k, a_ptr, c_ptr, jitter->get_p_addr(),
+                        jitter->get_offset_data(), jitter->get_a_offsets(),
+                        jitter->get_c_offsets(), mask, idx);
         break;
       case 7:
-        gemm_f32_j7('N', 'N', ielem, jelem, k, 1, a_ptr, k, b_ptr, n, 0, c_ptr,
-                    n);
+        asm_gemm_f32_j7(k, a_ptr, c_ptr, jitter->get_p_addr(),
+                        jitter->get_offset_data(), jitter->get_a_offsets(),
+                        jitter->get_c_offsets(), mask, idx);
         break;
       case 8:
-        gemm_f32_j8('N', 'N', ielem, jelem, k, 1, a_ptr, k, b_ptr, n, 0, c_ptr,
-                    n);
+        asm_gemm_f32_j8(k, a_ptr, c_ptr, jitter->get_p_addr(),
+                        jitter->get_offset_data(), jitter->get_a_offsets(),
+                        jitter->get_c_offsets(), mask, idx);
         break;
       case 9:
-        gemm_f32_j9('N', 'N', ielem, jelem, k, 1, a_ptr, k, b_ptr, n, 0, c_ptr,
-                    n);
+        asm_gemm_f32_j9(k, a_ptr, c_ptr, jitter->get_p_addr(),
+                        jitter->get_offset_data(), jitter->get_a_offsets(),
+                        jitter->get_c_offsets(), mask, idx);
         break;
       case 10:
-        gemm_f32_j10('N', 'N', ielem, jelem, k, 1, a_ptr, k, b_ptr, n, 0, c_ptr,
-                     n);
+        asm_gemm_f32_j10(k, a_ptr, c_ptr, jitter->get_p_addr(),
+                         jitter->get_offset_data(), jitter->get_a_offsets(),
+                         jitter->get_c_offsets(), mask, idx);
         break;
       case 11:
-        gemm_f32_j11('N', 'N', ielem, jelem, k, 1, a_ptr, k, b_ptr, n, 0, c_ptr,
-                     n);
+        asm_gemm_f32_j11(k, a_ptr, c_ptr, jitter->get_p_addr(),
+                         jitter->get_offset_data(), jitter->get_a_offsets(),
+                         jitter->get_c_offsets(), mask, idx);
         break;
       case 12:
-        gemm_f32_j12('N', 'N', ielem, jelem, k, 1, a_ptr, k, b_ptr, n, 0, c_ptr,
-                     n);
+        asm_gemm_f32_j12(k, a_ptr, c_ptr, jitter->get_p_addr(),
+                         jitter->get_offset_data(), jitter->get_a_offsets(),
+                         jitter->get_c_offsets(), mask, idx);
         break;
       case 13:
-        gemm_f32_j13('N', 'N', ielem, jelem, k, 1, a_ptr, k, b_ptr, n, 0, c_ptr,
-                     n);
+        asm_gemm_f32_j13(k, a_ptr, c_ptr, jitter->get_p_addr(),
+                         jitter->get_offset_data(), jitter->get_a_offsets(),
+                         jitter->get_c_offsets(), mask, idx);
         break;
       case 14:
-        gemm_f32_j14('N', 'N', ielem, jelem, k, 1, a_ptr, k, b_ptr, n, 0, c_ptr,
-                     n);
+        asm_gemm_f32_j14(k, a_ptr, c_ptr, jitter->get_p_addr(),
+                         jitter->get_offset_data(), jitter->get_a_offsets(),
+                         jitter->get_c_offsets(), mask, idx);
         break;
     }
   };
