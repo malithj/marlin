@@ -1,9 +1,11 @@
 #ifndef __BENCHMARK_H__
 #define __BENCHMARK_H__
+
 #include <libxsmm.h>
 #include <mkl.h>
 #include <stdlib.h>
 
+#include <Eigen/Dense>
 #include <chrono>
 #include <fstream>
 
@@ -11,6 +13,7 @@
 #include "../../include/mem/memory.h"
 #include "gtest/gtest.h"
 using namespace testing;
+using namespace Eigen;
 
 /*  write benchmarking results to file */
 bool tofile(std::string filename, double *array, index_t height, index_t width,
