@@ -202,18 +202,14 @@ inline index_t sgemm(char transa, char transb, index_t m, index_t n, index_t k,
       b_ptr = b + j;
       c_ptr = c + i * n + j;
 #ifdef ENABLE_JIT
-      gemm_f32_j15(k, a_ptr, c_ptr, jitter->get_p_addr(),
-                   jitter->get_offset_data(), jitter->get_a_offsets(),
-                   jitter->get_c_offsets(), jitter->get_mask(), idx);
+      asm_gemm(k, a_ptr, c_ptr, jitter->get_p_addr(), jitter->get_offset_data(),
+               jitter->get_a_offsets(), jitter->get_c_offsets(),
+               jitter->get_mask(), idx + (j / 15) * k);
 #else
       gemm_f32_j15('N', 'N', 0x10, 0xf, k, 1, a_ptr, k, b_ptr, n, 0, c_ptr, n);
 #endif
     }
   }
-
-#ifdef ENABLE_JIT
-  idx += (ftile_i_lim / 16) * (ftile_j_lim / 15);
-#endif
 
   if (ptile_i_remain) {
     a_ptr = a + ftile_i_lim * k;
@@ -221,9 +217,9 @@ inline index_t sgemm(char transa, char transb, index_t m, index_t n, index_t k,
       b_ptr = b + j;
       c_ptr = c + ftile_i_lim * n + j;
 #ifdef ENABLE_JIT
-      gemm_f32_j15(k, a_ptr, c_ptr, jitter->get_p_addr(),
-                   jitter->get_offset_data(), jitter->get_a_offsets(),
-                   jitter->get_c_offsets(), jitter->get_pmask(), idx);
+      asm_gemm(k, a_ptr, c_ptr, jitter->get_p_addr(), jitter->get_offset_data(),
+               jitter->get_a_offsets(), jitter->get_c_offsets(),
+               jitter->get_pmask(), idx + (j / 15) * k);
 #else
       gemm_f32_j15('N', 'N', ptile_i_remain, 0xf, k, 1, a_ptr, k, b_ptr, n, 0,
                    c_ptr, n);
@@ -231,18 +227,30 @@ inline index_t sgemm(char transa, char transb, index_t m, index_t n, index_t k,
     }
   }
 
+#ifdef ENABLE_JIT
+  idx += (ftile_j_lim / 15) * k;
+#endif
+
   if (ptile_j_remain) {
     b_ptr = b + ftile_j_lim;
     for (index_t i = 0; i < ftile_i_lim; i += 0x10) {
       a_ptr = a + i * k;
       c_ptr = c + i * n + ftile_j_lim;
+#ifdef ENABLE_JIT
+      execute_kernel(jitter->get_mask(), ptile_j_remain);
+#else
       execute_kernel(0x10, ptile_j_remain);
+#endif
     }
 
     if (ptile_i_remain) {
       a_ptr = a + ftile_i_lim * k;
       c_ptr = c + ftile_i_lim * n + ftile_j_lim;
+#ifdef ENABLE_JIT
+      execute_kernel(jitter->get_pmask(), ptile_j_remain);
+#else
       execute_kernel(ptile_i_remain, ptile_j_remain);
+#endif
     }
   }
 
