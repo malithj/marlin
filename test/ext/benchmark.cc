@@ -13,7 +13,7 @@ TEST(Benchmark, Jitters) {
     const index_t iterations = 100;
     const index_t num_mat = (mat_end - mat_strt) / mat_inc;
     // vars in line: mat_size, dyn, stat, sgemm, ..., asm-conv, ...
-    const index_t width = 7;
+    const index_t width = 9;
     const index_t height = iterations * num_mat;
 
     double *results =
@@ -125,6 +125,10 @@ TEST(Benchmark, Jitters) {
           std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
       results[itr_strt + 6] = duration.count() / 1000.0f;
 
+      Map<MatrixXf> eigen_A(A, m, k);
+      Map<MatrixXf> eigen_B(B, k, n);
+      Map<MatrixXf> eigen_C(C, m, n);
+
       for (index_t i = 0; i < iterations; ++i) {
         const index_t itr_strt = offset + i * width;
         // set mat size
@@ -176,6 +180,21 @@ TEST(Benchmark, Jitters) {
         duration =
             std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
         results[itr_strt + 6] += duration.count() / 1000.0f;
+
+        begin = std::chrono::steady_clock::now();
+        eigen_C = eigen_A * eigen_B;
+        end = std::chrono::steady_clock::now();
+        duration =
+            std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
+        results[itr_strt + 7] += duration.count() / 1000.0f;
+
+        begin = std::chrono::steady_clock::now();
+        cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, m, n, k, 1, A, k,
+                    B, n, 0, C, n);
+        end = std::chrono::steady_clock::now();
+        duration =
+            std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
+        results[itr_strt + 8] += duration.count() / 1000.0f;
       }
       status = mkl_jit_destroy(jitter);
       if (MKL_JIT_ERROR == status) {
@@ -197,7 +216,7 @@ TEST(Benchmark, Jitters) {
     filename = "build/results/benchmark_results_" + s + ".csv";
     std::string header =
         "IDX,MAT_SIZE,ONEDNN_DYNAMIC,ONEDNN_STATIC,ONEDNN_SGEMM,"
-        "MARLIN,MKL_JIT,LIBXSMM";
+        "MARLIN,MKL_JIT,LIBXSMM,EIGEN,OPENBLAS";
     tofile(filename, results, height, width, header);
     aligned_free(results);
   };
