@@ -404,7 +404,7 @@ TEST(ASM_GEMM, f32_j9) {
 TEST(ASM_GEMM, f32_j10) {
   constexpr index_t m = 16;
   constexpr index_t n = 10;
-  constexpr index_t k = 15;
+  constexpr index_t k = 10;
 
   float *A = static_cast<float *>(std::malloc(m * k * sizeof(float)));
   float *B = static_cast<float *>(std::malloc(n * k * sizeof(float)));
