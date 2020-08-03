@@ -3,6 +3,8 @@
 #include "gtest/gtest.h"
 #include "jit/jitter.h"
 
+using namespace MARLIN;
+
 TEST(JIT, GEMM) {
   index_t m = 16;
   index_t n = 16;
@@ -38,9 +40,9 @@ TEST(JIT, GEMM) {
   sgemm('N', 'N', m, n, k, 1.0, A, k, B, n, 0, C, n);
 #endif
 
-  // for (index_t i = 0; i < m * n; ++i) {
-  //   EXPECT_EQ(C_REF[i], C[i]);
-  // }
+  for (index_t i = 0; i < m * n; ++i) {
+    EXPECT_EQ(C_REF[i], C[i]);
+  }
 
   std::free(A);
   std::free(B);
