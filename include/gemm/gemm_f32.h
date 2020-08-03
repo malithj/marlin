@@ -14,6 +14,7 @@
 #include "./kernels.h"
 #endif
 
+namespace MARLIN {
 // Performs GEMM (General Matrix Multiplication)
 // block size for all three dimensions is set to the above "N" value by
 // default.
@@ -256,5 +257,5 @@ inline index_t sgemm(char transa, char transb, index_t m, index_t n, index_t k,
 
   return 1;
 }
-
+}  // namespace MARLIN
 #endif
