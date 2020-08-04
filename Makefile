@@ -12,10 +12,14 @@ INCLUDE_DIR=include
 MKDIR_P=mkdir -p
 GOOGLE_TEST=googletest
 RESULT_DIR=results
+EIGEN_INC_DIR=${EIGEN_INC}
 LIBXSMM_LIB_DIR=${LIBXSMM_LIB}
 LIBXSMM_INC_DIR=${LIBXSMM_INC}
 MKL_LIB_DIR=${MKL_LIB}
 MKL_INC_DIR=${MKL_INC}
+OPENBLAS_INC_DIR=${OPENBLAS_INC}
+OPENBLAS_CFG_INC_DIR=${OPENBLAS_CFG_INC}
+OPENBLAS_LIB_DIR=${OPENBLAS_LIB}
 ONEDNN_CFG_INC_DIR=${ONEDNN_LIB}/../include
 ONEDNN_LIB_DIR=${ONEDNN_LIB}
 ONEDNN_INC_DIR=${ONEDNN_INC}
@@ -198,7 +202,7 @@ $(ASM_TRANSPOSE): $(SRC_DIR)/asm/asm_transpose.s
 $(BENCHMARK): $(TEST_DIR)/ext/benchmark.cc
 	@echo "${LINE_COLOR}Building object file: $@${RESET_COLOR}"
 	@echo -n "${CMD_COLOR}"
-	$(CC) -o $@ -c $^ $(EXT_FLAGS) -I $(INCLUDE_DIR) -I $(GOOGLE_TEST)/$(GOOGLE_TEST)/include -I $(ONEDNN_INC_DIR) -I ${ONEDNN_CFG_INC_DIR} -I $(MKL_INC_DIR)  -I $(LIBXSMM_INC_DIR)
+	$(CC) -o $@ -c $^ $(EXT_FLAGS) -I $(INCLUDE_DIR) -I $(GOOGLE_TEST)/$(GOOGLE_TEST)/include -I $(ONEDNN_INC_DIR) -I ${ONEDNN_CFG_INC_DIR} -I $(MKL_INC_DIR)  -I $(LIBXSMM_INC_DIR) -I ${EIGEN_INC_DIR} -I ${OPENBLAS_INC} -I ${OPENBLAS_CFG_INC_DIR}
 	@echo "${RESET_COLOR}"
 
 $(EXT): $(TEST_DIR)/ext/main.cc
@@ -303,7 +307,7 @@ $(TEST_TRANSPOSE): $(TEST_DIR)/mat/test_transpose.cc $(INCLUDE_DIR)/mat/transpos
 ext: $(EXT) $(BENCHMARK) $(ASM_GEMM) $(ASM_GEMM_F32_J1) $(ASM_GEMM_F32_J2) $(ASM_GEMM_F32_J3) $(ASM_GEMM_F32_J4) $(ASM_GEMM_F32_J5) $(ASM_GEMM_F32_J6) $(ASM_GEMM_F32_J7) $(ASM_GEMM_F32_J8) $(ASM_GEMM_F32_J9) $(ASM_GEMM_F32_J10) $(ASM_GEMM_F32_J11) $(ASM_GEMM_F32_J12) $(ASM_GEMM_F32_J13) $(ASM_GEMM_F32_J14) $(BUILD_DIR)/$(GOOGLE_TEST)/lib/libgtest.a
 	@echo "${LINE_COLOR}Linking object file $@ with $^${RESET_COLOR}"
 	@echo -n "${CMD_COLOR}"
-	$(CC) -o $(BUILD_DIR)/$@ $^ $(TEST_FLAGS) -DMKL_ILP64 -m64 -I $(INCLUDE_DIR) -I $(GOOGLE_TEST)/$(GOOGLE_TEST)/include -I $(ONEDNN_INC_DIR) -I ${ONEDNN_CFG_INC_DIR} -L $(ONEDNN_LIB_DIR) -I $(MKL_INC_DIR) -L $(MKL_LIB_DIR) -L $(LIBXSMM_LIB_DIR) -lxsmm -ldnnl -Wl,--no-as-needed -lmkl_intel_ilp64 -lmkl_sequential -lmkl_core -lpthread -lm -ldl
+	$(CC) -o $(BUILD_DIR)/$@ $^ $(TEST_FLAGS) -DMKL_ILP64 -m64 -I $(INCLUDE_DIR) -I $(GOOGLE_TEST)/$(GOOGLE_TEST)/include -I $(ONEDNN_INC_DIR) -I ${ONEDNN_CFG_INC_DIR} -L $(ONEDNN_LIB_DIR) -I $(MKL_INC_DIR) -L $(MKL_LIB_DIR) -L $(LIBXSMM_LIB_DIR) -L $(OPENBLAS_LIB_DIR) -lopenblas -lxsmm -ldnnl -Wl,--no-as-needed -lmkl_intel_ilp64 -lmkl_sequential -lmkl_core -lpthread -lm -ldl
 
 main: $(MAIN) $(VTUNE_LIB_DIR)/libjitprofiling.a
 	@echo "${LINE_COLOR}Linking object file $@ with $^${RESET_COLOR}"
