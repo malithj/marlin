@@ -41,26 +41,13 @@ asm_gemm_f32_j5:
     movq %r13, -0x18(%rbp)                   # [SAVE R13 REG TO STACK]
     movq %r14, -0x20(%rbp)                   # [SAVE R14 REG TO STACK]
 
-    vmovaps %zmm0, %zmm2                     # COPY SRC REGISTER TO FUTURE C0 
     movzwl 0x18(%rbp), %r11d                 # LD MASK FROM STACK  [SCRBL: r11]
     kmovw  %r11d, %k1                        # SET MASK
-    vgatherdps (%rdx, %zmm1, 4), %zmm2{%k1}  # LOAD C0 COL TO REGISTER
-    lea 0x4(%rdx), %rdx                      # INCREMENT C MATRIX PTR
-    vmovaps %zmm0, %zmm3                     # COPY SRC REGISTER TO FUTURE C0 
-    kmovw  %r11d, %k1                        # SET MASK
-    vgatherdps (%rdx, %zmm1, 4), %zmm3{%k1}  # LOAD C1 COL TO REGISTER
-    lea 0x4(%rdx), %rdx                      # INCREMENT C MATRIX PTR
-    vmovaps %zmm0, %zmm4                     # COPY SRC REGISTER TO FUTURE C0 
-    kmovw  %r11d, %k1                        # SET MASK
-    vgatherdps (%rdx, %zmm1, 4), %zmm4{%k1}  # LOAD C2 COL TO REGISTER
-    lea 0x4(%rdx), %rdx                      # INCREMENT C MATRIX PTR
-    vmovaps %zmm0, %zmm5                     # COPY SRC REGISTER TO FUTURE C0 
-    kmovw  %r11d, %k1                        # SET MASK
-    vgatherdps (%rdx, %zmm1, 4), %zmm5{%k1}  # LOAD C3 COL TO REGISTER
-    lea 0x4(%rdx), %rdx                      # INCREMENT C MATRIX PTR
-    vmovaps %zmm0, %zmm6                     # COPY SRC REGISTER TO FUTURE C0 
-    kmovw  %r11d, %k1                        # SET MASK
-    vgatherdps (%rdx, %zmm1, 4), %zmm6{%k1}  # LOAD C4 COL TO REGISTER
+    vxorps %zmm2, %zmm2, %zmm2
+    vxorps %zmm3, %zmm3, %zmm3
+    vxorps %zmm4, %zmm4, %zmm4
+    vxorps %zmm5, %zmm5, %zmm5
+    vxorps %zmm6, %zmm6, %zmm6
 
     vmovdqu32 (%r9), %zmm1                   # LD A MATRIX INDICES
     # START MATRIX MULTIPLICATION

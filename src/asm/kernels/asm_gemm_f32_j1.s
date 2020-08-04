@@ -41,10 +41,9 @@ asm_gemm_f32_j1:
     movq %r13, -0x18(%rbp)                   # [SAVE R13 REG TO STACK]
     movq %r14, -0x20(%rbp)                   # [SAVE R14 REG TO STACK]
 
-    vmovaps %zmm0, %zmm2                     # COPY SRC REGISTER TO FUTURE C0 
     movzwl 0x18(%rbp), %r11d                 # LD MASK FROM STACK  [SCRBL: r11]
     kmovw  %r11d, %k1                        # SET MASK
-    vgatherdps (%rdx, %zmm1, 4), %zmm2{%k1}  # LOAD C0 COL TO REGISTER
+    vxorps %zmm2, %zmm2, %zmm2
 
     vmovdqu32 (%r9), %zmm1                   # LD A MATRIX INDICES
     # START MATRIX MULTIPLICATION
