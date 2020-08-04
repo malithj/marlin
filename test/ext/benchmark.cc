@@ -72,9 +72,12 @@ TEST(Benchmark, Jitters) {
 
     for (index_t mat_size = mat_strt; mat_size < mat_end; mat_size += mat_inc) {
       m = k = n = mat_size;
-      float *A = static_cast<float *>(aligned_alloc(m * k, sizeof(float)));
-      float *B = static_cast<float *>(aligned_alloc(k * n, sizeof(float)));
-      float *C = static_cast<float *>(aligned_alloc(m * n, sizeof(float)));
+      float *A = static_cast<float *>(
+          _mm_malloc(m * k * sizeof(float), ALIGN_BYTE_SIZE));
+      float *B = static_cast<float *>(
+          _mm_malloc(k * n * sizeof(float), ALIGN_BYTE_SIZE));
+      float *C = static_cast<float *>(
+          _mm_malloc(m * n * sizeof(float), ALIGN_BYTE_SIZE));
       for (index_t h = 0; h < m; ++h) {
         for (index_t w = 0; w < k; ++w) {
           index_t idx = h * k + w;
@@ -93,8 +96,10 @@ TEST(Benchmark, Jitters) {
 
       // ASM Jitter
       begin = std::chrono::steady_clock::now();
+#ifdef ENABLE_JIT
       std::shared_ptr<Jitter<float>> jit_ = std::make_shared<Jitter<float>>();
       jit_->generate_code(B, m, k, n);
+#endif
       end = std::chrono::steady_clock::now();
       duration =
           std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
@@ -161,7 +166,11 @@ TEST(Benchmark, Jitters) {
         results[itr_strt + 3] = duration.count() / 1000.0f;
 
         begin = std::chrono::steady_clock::now();
+#ifdef ENABLE_JIT
         MARLIN::sgemm('N', 'N', m, n, k, 1.0, A, k, B, n, 0, C, n, jit_);
+#else
+        MARLIN::sgemm('N', 'N', m, n, k, 1.0, A, k, B, n, 0, C, n);
+#endif
         end = std::chrono::steady_clock::now();
         duration =
             std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
@@ -200,9 +209,9 @@ TEST(Benchmark, Jitters) {
       if (MKL_JIT_ERROR == status) {
         throw std::runtime_error("failed releasing JIT memory");
       }
-      aligned_free(A);
-      aligned_free(B);
-      aligned_free(C);
+      _mm_free(A);
+      _mm_free(B);
+      _mm_free(C);
     }
 
     std::stringstream stream;
