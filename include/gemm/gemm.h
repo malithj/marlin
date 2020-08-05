@@ -109,7 +109,7 @@ index_t gemm(char transa, char transb, index_t m, index_t n, index_t k, T alpha,
       }
     }
   } else {
-    b_t_mat = b;
+    a_t_mat = a;
   }
 
   T* c_t_mat = static_cast<T*>(std::malloc(m * n * sizeof(T)));
