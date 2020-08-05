@@ -5,6 +5,7 @@ EXT_FLAGS=-Wall -march=skylake-avx512 -g -D ENABLE_JIT
 TEST_FLAGS=-Wall -march=skylake-avx512 -g -D ENABLE_JIT
 TARGET=main
 TEST_TARGET=test
+XSMM_TARGET=xsmm
 BUILD_DIR=build
 SRC_DIR=src
 TEST_DIR=test
@@ -62,6 +63,8 @@ TEST_JIT_GEMM_O=test_jit_gemm.o
 TEST_JIT_KERNEL_O=test_jit_kernel.o
 TEST_TRANSPOSE_O=test_transpose.o
 TEST_SCATTER_O=test_scatter.o
+TEST_XSMM_O=test_xsmm.o
+XSMM_O=xsmm.o
 
 # create object files in binary directory
 ASM_GEMM=$(patsubst %,$(ODIR)/%,$(ASM_GEMM_O))
@@ -96,6 +99,8 @@ TEST_JIT_KERNEL=$(patsubst %,$(ODIR)/%,$(TEST_JIT_KERNEL_O))
 TEST_JIT_GEMM=$(patsubst %,$(ODIR)/%,$(TEST_JIT_GEMM_O))
 TEST_TRANSPOSE=$(patsubst %,$(ODIR)/%,$(TEST_TRANSPOSE_O))
 TEST_SCATTER=$(patsubst %,$(ODIR)/%,$(TEST_SCATTER_O))
+TEST_XSMM=$(patsubst %,$(ODIR)/%,$(TEST_XSMM_O))
+XSMM=$(patsubst %,$(ODIR)/%,$(XSMM_O))
 
 
 all: $(OUT_DIR) $(GOOGLE_TEST) $(TARGET)
@@ -304,6 +309,18 @@ $(TEST_TRANSPOSE): $(TEST_DIR)/mat/test_transpose.cc $(INCLUDE_DIR)/mat/transpos
 	$(CC) -o $@ -c $< $(TEST_FLAGS) -I $(GOOGLE_TEST)/$(GOOGLE_TEST)/include -I $(INCLUDE_DIR)
 	@echo "${RESET_COLOR}"
 
+$(TEST_XSMM): $(TEST_DIR)/xsmm/test_xsmm.cc
+	@echo "${LINE_COLOR}Building object file: $@${RESET_COLOR}"	
+	@echo -n "${CMD_COLOR}"
+	$(CC) -o $@ -c $< $(TEST_FLAGS) -I $(GOOGLE_TEST)/$(GOOGLE_TEST)/include -I $(INCLUDE_DIR) -I $(LIBXSMM_INC_DIR)
+	@echo "${RESET_COLOR}"
+
+$(XSMM): $(TEST_DIR)/xsmm/main.cc
+	@echo "${LINE_COLOR}Building object file: $@${RESET_COLOR}"	
+	@echo -n "${CMD_COLOR}"
+	$(CC) -o $@ -c $< $(TEST_FLAGS) -I $(GOOGLE_TEST)/$(GOOGLE_TEST)/include -I $(INCLUDE_DIR)
+	@echo "${RESET_COLOR}"
+
 ext: $(EXT) $(BENCHMARK) $(ASM_GEMM) $(ASM_GEMM_F32_J1) $(ASM_GEMM_F32_J2) $(ASM_GEMM_F32_J3) $(ASM_GEMM_F32_J4) $(ASM_GEMM_F32_J5) $(ASM_GEMM_F32_J6) $(ASM_GEMM_F32_J7) $(ASM_GEMM_F32_J8) $(ASM_GEMM_F32_J9) $(ASM_GEMM_F32_J10) $(ASM_GEMM_F32_J11) $(ASM_GEMM_F32_J12) $(ASM_GEMM_F32_J13) $(ASM_GEMM_F32_J14) $(BUILD_DIR)/$(GOOGLE_TEST)/lib/libgtest.a
 	@echo "${LINE_COLOR}Linking object file $@ with $^${RESET_COLOR}"
 	@echo -n "${CMD_COLOR}"
@@ -320,6 +337,11 @@ test: $(TEST) $(TEST_GEMM_KERNEL) $(TEST_GEMM_F32) $(TEST_JIT) $(TEST_JIT_ASM) $
 	@echo "${LINE_COLOR}Linking object file $@ with $^${RESET_COLOR}"
 	@echo -n "${CMD_COLOR}"
 	$(CC) -o $(BUILD_DIR)/$@ $^ $(TEST_FLAGS) -I $(INCLUDE_DIR) -I $(GOOGLE_TEST)/$(GOOGLE_TEST)/include -lpthread 
+
+xsmm: $(XSMM) $(TEST_XSMM) $(BUILD_DIR)/$(GOOGLE_TEST)/lib/libgtest.a
+	@echo "${LINE_COLOR}Linking object file $@ with $^${RESET_COLOR}"
+	@echo -n "${CMD_COLOR}"
+	$(CC) -o $(BUILD_DIR)/$@ $^ $(TEST_FLAGS) -I $(INCLUDE_DIR) -I $(GOOGLE_TEST)/$(GOOGLE_TEST)/include -I $(MKL_INC_DIR) -L $(MKL_LIB_DIR) -L $(LIBXSMM_LIB_DIR) -L $(OPENBLAS_LIB_DIR) -lopenblas -lxsmm -Wl,--no-as-needed -lmkl_intel_ilp64 -lmkl_sequential -lmkl_core -lpthread -lm -ldl
 
 .PHONY: clean googletest
 
