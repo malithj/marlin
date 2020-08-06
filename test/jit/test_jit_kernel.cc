@@ -34,13 +34,15 @@ TEST(ASM_GEMM, f32_j1) {
 
   memset(C, 0, m * n * sizeof(float));
   memset(C_REF, 0, m * n * sizeof(float));
-  gemm<float>('N', 'N', m, n, k, 1.0, A, k, B, n, 0, C_REF, n);
-  asm_gemm_f32_j1(k, A, C, jitter->get_p_addr(), jitter->get_offset_data(),
-                  jitter->get_a_offsets(), jitter->get_c_offsets(),
-                  jitter->get_mask(), idx);
+  gemm<float>('T', 'N', m, n, k, 1.0, A, k, B, n, 0, C_REF, n);
+  asm_gemm_f32_j1(m, k, n, A, C, jitter->get_p_addr(),
+                  jitter->get_offset_data(), jitter->get_mask(), idx);
 
-  for (index_t i = 0; i < m * n; ++i) {
-    EXPECT_EQ(C_REF[i], C[i]);
+  // asm: col major & gemm: row major
+  for (index_t i = 0; i < n; ++i) {
+    for (index_t j = 0; j < m; ++j) {
+      EXPECT_EQ(C_REF[j * n + i], C[i * m + j]);
+    }
   }
 
   std::free(A);
@@ -78,13 +80,15 @@ TEST(ASM_GEMM, f32_j2) {
 
   memset(C, 0, m * n * sizeof(float));
   memset(C_REF, 0, m * n * sizeof(float));
-  gemm<float>('N', 'N', m, n, k, 1.0, A, k, B, n, 0, C_REF, n);
-  asm_gemm_f32_j2(k, A, C, jitter->get_p_addr(), jitter->get_offset_data(),
-                  jitter->get_a_offsets(), jitter->get_c_offsets(),
-                  jitter->get_mask(), idx);
+  gemm<float>('T', 'N', m, n, k, 1.0, A, k, B, n, 0, C_REF, n);
+  asm_gemm_f32_j2(m, k, n, A, C, jitter->get_p_addr(),
+                  jitter->get_offset_data(), jitter->get_mask(), idx);
 
-  for (index_t i = 0; i < m * n; ++i) {
-    EXPECT_EQ(C_REF[i], C[i]);
+  // asm: col major & gemm: row major
+  for (index_t i = 0; i < n; ++i) {
+    for (index_t j = 0; j < m; ++j) {
+      EXPECT_EQ(C_REF[j * n + i], C[i * m + j]);
+    }
   }
 
   std::free(A);
@@ -122,13 +126,15 @@ TEST(ASM_GEMM, f32_j3) {
 
   memset(C, 0, m * n * sizeof(float));
   memset(C_REF, 0, m * n * sizeof(float));
-  gemm<float>('N', 'N', m, n, k, 1.0, A, k, B, n, 0, C_REF, n);
-  asm_gemm_f32_j3(k, A, C, jitter->get_p_addr(), jitter->get_offset_data(),
-                  jitter->get_a_offsets(), jitter->get_c_offsets(),
-                  jitter->get_mask(), idx);
+  gemm<float>('T', 'N', m, n, k, 1.0, A, k, B, n, 0, C_REF, n);
+  asm_gemm_f32_j3(m, k, n, A, C, jitter->get_p_addr(),
+                  jitter->get_offset_data(), jitter->get_mask(), idx);
 
-  for (index_t i = 0; i < m * n; ++i) {
-    EXPECT_EQ(C_REF[i], C[i]);
+  // asm: col major & gemm: row major
+  for (index_t i = 0; i < n; ++i) {
+    for (index_t j = 0; j < m; ++j) {
+      EXPECT_EQ(C_REF[j * n + i], C[i * m + j]);
+    }
   }
 
   std::free(A);
@@ -166,13 +172,15 @@ TEST(ASM_GEMM, f32_j4) {
 
   memset(C, 0, m * n * sizeof(float));
   memset(C_REF, 0, m * n * sizeof(float));
-  gemm<float>('N', 'N', m, n, k, 1.0, A, k, B, n, 0, C_REF, n);
-  asm_gemm_f32_j4(k, A, C, jitter->get_p_addr(), jitter->get_offset_data(),
-                  jitter->get_a_offsets(), jitter->get_c_offsets(),
-                  jitter->get_mask(), idx);
+  gemm<float>('T', 'N', m, n, k, 1.0, A, k, B, n, 0, C_REF, n);
+  asm_gemm_f32_j4(m, k, n, A, C, jitter->get_p_addr(),
+                  jitter->get_offset_data(), jitter->get_mask(), idx);
 
-  for (index_t i = 0; i < m * n; ++i) {
-    EXPECT_EQ(C_REF[i], C[i]);
+  // asm: col major & gemm: row major
+  for (index_t i = 0; i < n; ++i) {
+    for (index_t j = 0; j < m; ++j) {
+      EXPECT_EQ(C_REF[j * n + i], C[i * m + j]);
+    }
   }
 
   std::free(A);
@@ -210,13 +218,15 @@ TEST(ASM_GEMM, f32_j5) {
 
   memset(C, 0, m * n * sizeof(float));
   memset(C_REF, 0, m * n * sizeof(float));
-  gemm<float>('N', 'N', m, n, k, 1.0, A, k, B, n, 0, C_REF, n);
-  asm_gemm_f32_j5(k, A, C, jitter->get_p_addr(), jitter->get_offset_data(),
-                  jitter->get_a_offsets(), jitter->get_c_offsets(),
-                  jitter->get_mask(), idx);
+  gemm<float>('T', 'N', m, n, k, 1.0, A, k, B, n, 0, C_REF, n);
+  asm_gemm_f32_j5(m, k, n, A, C, jitter->get_p_addr(),
+                  jitter->get_offset_data(), jitter->get_mask(), idx);
 
-  for (index_t i = 0; i < m * n; ++i) {
-    EXPECT_EQ(C_REF[i], C[i]);
+  // asm: col major & gemm: row major
+  for (index_t i = 0; i < n; ++i) {
+    for (index_t j = 0; j < m; ++j) {
+      EXPECT_EQ(C_REF[j * n + i], C[i * m + j]);
+    }
   }
 
   std::free(A);
@@ -254,15 +264,16 @@ TEST(ASM_GEMM, f32_j6) {
 
   memset(C, 0, m * n * sizeof(float));
   memset(C_REF, 0, m * n * sizeof(float));
-  gemm<float>('N', 'N', m, n, k, 1.0, A, k, B, n, 0, C_REF, n);
-  asm_gemm_f32_j6(k, A, C, jitter->get_p_addr(), jitter->get_offset_data(),
-                  jitter->get_a_offsets(), jitter->get_c_offsets(),
-                  jitter->get_mask(), idx);
+  gemm<float>('T', 'N', m, n, k, 1.0, A, k, B, n, 0, C_REF, n);
+  asm_gemm_f32_j6(m, k, n, A, C, jitter->get_p_addr(),
+                  jitter->get_offset_data(), jitter->get_mask(), idx);
 
-  for (index_t i = 0; i < m * n; ++i) {
-    EXPECT_EQ(C_REF[i], C[i]);
+  // asm: col major & gemm: row major
+  for (index_t i = 0; i < n; ++i) {
+    for (index_t j = 0; j < m; ++j) {
+      EXPECT_EQ(C_REF[j * n + i], C[i * m + j]);
+    }
   }
-
   std::free(A);
   std::free(B);
   std::free(C);
@@ -298,13 +309,15 @@ TEST(ASM_GEMM, f32_j7) {
 
   memset(C, 0, m * n * sizeof(float));
   memset(C_REF, 0, m * n * sizeof(float));
-  gemm<float>('N', 'N', m, n, k, 1.0, A, k, B, n, 0, C_REF, n);
-  asm_gemm_f32_j7(k, A, C, jitter->get_p_addr(), jitter->get_offset_data(),
-                  jitter->get_a_offsets(), jitter->get_c_offsets(),
-                  jitter->get_mask(), idx);
+  gemm<float>('T', 'N', m, n, k, 1.0, A, k, B, n, 0, C_REF, n);
+  asm_gemm_f32_j7(m, k, n, A, C, jitter->get_p_addr(),
+                  jitter->get_offset_data(), jitter->get_mask(), idx);
 
-  for (index_t i = 0; i < m * n; ++i) {
-    EXPECT_EQ(C_REF[i], C[i]);
+  // asm: col major & gemm: row major
+  for (index_t i = 0; i < n; ++i) {
+    for (index_t j = 0; j < m; ++j) {
+      EXPECT_EQ(C_REF[j * n + i], C[i * m + j]);
+    }
   }
 
   std::free(A);
@@ -342,13 +355,15 @@ TEST(ASM_GEMM, f32_j8) {
 
   memset(C, 0, m * n * sizeof(float));
   memset(C_REF, 0, m * n * sizeof(float));
-  gemm<float>('N', 'N', m, n, k, 1.0, A, k, B, n, 0, C_REF, n);
-  asm_gemm_f32_j8(k, A, C, jitter->get_p_addr(), jitter->get_offset_data(),
-                  jitter->get_a_offsets(), jitter->get_c_offsets(),
-                  jitter->get_mask(), idx);
+  gemm<float>('T', 'N', m, n, k, 1.0, A, k, B, n, 0, C_REF, n);
+  asm_gemm_f32_j8(m, k, n, A, C, jitter->get_p_addr(),
+                  jitter->get_offset_data(), jitter->get_mask(), idx);
 
-  for (index_t i = 0; i < m * n; ++i) {
-    EXPECT_EQ(C_REF[i], C[i]);
+  // asm: col major & gemm: row major
+  for (index_t i = 0; i < n; ++i) {
+    for (index_t j = 0; j < m; ++j) {
+      EXPECT_EQ(C_REF[j * n + i], C[i * m + j]);
+    }
   }
 
   std::free(A);
@@ -386,13 +401,15 @@ TEST(ASM_GEMM, f32_j9) {
 
   memset(C, 0, m * n * sizeof(float));
   memset(C_REF, 0, m * n * sizeof(float));
-  gemm<float>('N', 'N', m, n, k, 1.0, A, k, B, n, 0, C_REF, n);
-  asm_gemm_f32_j9(k, A, C, jitter->get_p_addr(), jitter->get_offset_data(),
-                  jitter->get_a_offsets(), jitter->get_c_offsets(),
-                  jitter->get_mask(), idx);
+  gemm<float>('T', 'N', m, n, k, 1.0, A, k, B, n, 0, C_REF, n);
+  asm_gemm_f32_j9(m, k, n, A, C, jitter->get_p_addr(),
+                  jitter->get_offset_data(), jitter->get_mask(), idx);
 
-  for (index_t i = 0; i < m * n; ++i) {
-    EXPECT_EQ(C_REF[i], C[i]);
+  // asm: col major & gemm: row major
+  for (index_t i = 0; i < n; ++i) {
+    for (index_t j = 0; j < m; ++j) {
+      EXPECT_EQ(C_REF[j * n + i], C[i * m + j]);
+    }
   }
 
   std::free(A);
@@ -430,15 +447,16 @@ TEST(ASM_GEMM, f32_j10) {
 
   memset(C, 0, m * n * sizeof(float));
   memset(C_REF, 0, m * n * sizeof(float));
-  gemm<float>('N', 'N', m, n, k, 1.0, A, k, B, n, 0, C_REF, n);
-  asm_gemm_f32_j10(k, A, C, jitter->get_p_addr(), jitter->get_offset_data(),
-                   jitter->get_a_offsets(), jitter->get_c_offsets(),
-                   jitter->get_mask(), idx);
+  gemm<float>('T', 'N', m, n, k, 1.0, A, k, B, n, 0, C_REF, n);
+  asm_gemm_f32_j10(m, k, n, A, C, jitter->get_p_addr(),
+                   jitter->get_offset_data(), jitter->get_mask(), idx);
 
-  for (index_t i = 0; i < m * n; ++i) {
-    EXPECT_EQ(C_REF[i], C[i]);
+  // asm: col major & gemm: row major
+  for (index_t i = 0; i < n; ++i) {
+    for (index_t j = 0; j < m; ++j) {
+      EXPECT_EQ(C_REF[j * n + i], C[i * m + j]);
+    }
   }
-
   std::free(A);
   std::free(B);
   std::free(C);
@@ -474,13 +492,15 @@ TEST(ASM_GEMM, f32_j11) {
 
   memset(C, 0, m * n * sizeof(float));
   memset(C_REF, 0, m * n * sizeof(float));
-  gemm<float>('N', 'N', m, n, k, 1.0, A, k, B, n, 0, C_REF, n);
-  asm_gemm_f32_j11(k, A, C, jitter->get_p_addr(), jitter->get_offset_data(),
-                   jitter->get_a_offsets(), jitter->get_c_offsets(),
-                   jitter->get_mask(), idx);
+  gemm<float>('T', 'N', m, n, k, 1.0, A, k, B, n, 0, C_REF, n);
+  asm_gemm_f32_j11(m, k, n, A, C, jitter->get_p_addr(),
+                   jitter->get_offset_data(), jitter->get_mask(), idx);
 
-  for (index_t i = 0; i < m * n; ++i) {
-    EXPECT_EQ(C_REF[i], C[i]);
+  // asm: col major & gemm: row major
+  for (index_t i = 0; i < n; ++i) {
+    for (index_t j = 0; j < m; ++j) {
+      EXPECT_EQ(C_REF[j * n + i], C[i * m + j]);
+    }
   }
 
   std::free(A);
@@ -518,13 +538,15 @@ TEST(ASM_GEMM, f32_j12) {
 
   memset(C, 0, m * n * sizeof(float));
   memset(C_REF, 0, m * n * sizeof(float));
-  gemm<float>('N', 'N', m, n, k, 1.0, A, k, B, n, 0, C_REF, n);
-  asm_gemm_f32_j12(k, A, C, jitter->get_p_addr(), jitter->get_offset_data(),
-                   jitter->get_a_offsets(), jitter->get_c_offsets(),
-                   jitter->get_mask(), idx);
+  gemm<float>('T', 'N', m, n, k, 1.0, A, k, B, n, 0, C_REF, n);
+  asm_gemm_f32_j12(m, k, n, A, C, jitter->get_p_addr(),
+                   jitter->get_offset_data(), jitter->get_mask(), idx);
 
-  for (index_t i = 0; i < m * n; ++i) {
-    EXPECT_EQ(C_REF[i], C[i]);
+  // asm: col major & gemm: row major
+  for (index_t i = 0; i < n; ++i) {
+    for (index_t j = 0; j < m; ++j) {
+      EXPECT_EQ(C_REF[j * n + i], C[i * m + j]);
+    }
   }
 
   std::free(A);
@@ -562,13 +584,15 @@ TEST(ASM_GEMM, f32_j13) {
 
   memset(C, 0, m * n * sizeof(float));
   memset(C_REF, 0, m * n * sizeof(float));
-  gemm<float>('N', 'N', m, n, k, 1.0, A, k, B, n, 0, C_REF, n);
-  asm_gemm_f32_j13(k, A, C, jitter->get_p_addr(), jitter->get_offset_data(),
-                   jitter->get_a_offsets(), jitter->get_c_offsets(),
-                   jitter->get_mask(), idx);
+  gemm<float>('T', 'N', m, n, k, 1.0, A, k, B, n, 0, C_REF, n);
+  asm_gemm_f32_j13(m, k, n, A, C, jitter->get_p_addr(),
+                   jitter->get_offset_data(), jitter->get_mask(), idx);
 
-  for (index_t i = 0; i < m * n; ++i) {
-    EXPECT_EQ(C_REF[i], C[i]);
+  // asm: col major & gemm: row major
+  for (index_t i = 0; i < n; ++i) {
+    for (index_t j = 0; j < m; ++j) {
+      EXPECT_EQ(C_REF[j * n + i], C[i * m + j]);
+    }
   }
 
   std::free(A);
@@ -606,13 +630,15 @@ TEST(ASM_GEMM, f32_j14) {
 
   memset(C, 0, m * n * sizeof(float));
   memset(C_REF, 0, m * n * sizeof(float));
-  gemm<float>('N', 'N', m, n, k, 1.0, A, k, B, n, 0, C_REF, n);
-  asm_gemm_f32_j14(k, A, C, jitter->get_p_addr(), jitter->get_offset_data(),
-                   jitter->get_a_offsets(), jitter->get_c_offsets(),
-                   jitter->get_mask(), idx);
+  gemm<float>('T', 'N', m, n, k, 1.0, A, k, B, n, 0, C_REF, n);
+  asm_gemm_f32_j14(m, k, n, A, C, jitter->get_p_addr(),
+                   jitter->get_offset_data(), jitter->get_mask(), idx);
 
-  for (index_t i = 0; i < m * n; ++i) {
-    EXPECT_EQ(C_REF[i], C[i]);
+  // asm: col major & gemm: row major
+  for (index_t i = 0; i < n; ++i) {
+    for (index_t j = 0; j < m; ++j) {
+      EXPECT_EQ(C_REF[j * n + i], C[i * m + j]);
+    }
   }
 
   std::free(A);

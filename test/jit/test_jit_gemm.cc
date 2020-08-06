@@ -6,9 +6,9 @@
 using namespace MARLIN;
 
 TEST(JIT, GEMM) {
-  index_t m = 16;
-  index_t n = 16;
-  index_t k = 1;
+  index_t m = 3;
+  index_t n = 5;
+  index_t k = 2;
 
   float *A = static_cast<float *>(std::malloc(m * k * sizeof(float)));
   float *B = static_cast<float *>(std::malloc(n * k * sizeof(float)));
@@ -33,16 +33,26 @@ TEST(JIT, GEMM) {
 
   memset(C, 0, m * n * sizeof(float));
   memset(C_REF, 0, m * n * sizeof(float));
-  gemm<float>('N', 'N', m, n, k, 1.0, A, k, B, n, 0, C_REF, n);
 #ifdef ENABLE_JIT
+  gemm<float>('T', 'N', m, n, k, 1.0, A, k, B, n, 0, C_REF, n);
   sgemm('N', 'N', m, n, k, 1.0, A, k, B, n, 0, C, n, jitter);
 #else
+  gemm<float>('N', 'N', m, n, k, 1.0, A, k, B, n, 0, C_REF, n);
   sgemm('N', 'N', m, n, k, 1.0, A, k, B, n, 0, C, n);
 #endif
 
+#ifdef ENABLE_JIT
+  // asm: col major & gemm: row major
+  for (index_t i = 0; i < n; ++i) {
+    for (index_t j = 0; j < m; ++j) {
+      EXPECT_EQ(C_REF[j * n + i], C[i * m + j]);
+    }
+  }
+#else
   for (index_t i = 0; i < m * n; ++i) {
     EXPECT_EQ(C_REF[i], C[i]);
   }
+#endif
 
   std::free(A);
   std::free(B);
