@@ -64,74 +64,60 @@ inline index_t sgemm(char transa, char transb, index_t m, index_t n, index_t k,
   auto execute_kernel = [&](uint16_t mask, index_t jelem) {
     switch (jelem) {
       case 1:
-        asm_gemm_f32_j1(k, a_ptr, c_ptr, jitter->get_p_addr(),
-                        jitter->get_offset_data(), jitter->get_a_offsets(),
-                        jitter->get_c_offsets(), mask, idx);
+        asm_gemm_f32_j1(m, k, n, a_ptr, c_ptr, jitter->get_p_addr(),
+                        jitter->get_offset_data(), mask, idx);
         break;
       case 2:
-        asm_gemm_f32_j2(k, a_ptr, c_ptr, jitter->get_p_addr(),
-                        jitter->get_offset_data(), jitter->get_a_offsets(),
-                        jitter->get_c_offsets(), mask, idx);
+        asm_gemm_f32_j2(m, k, n, a_ptr, c_ptr, jitter->get_p_addr(),
+                        jitter->get_offset_data(), mask, idx);
         break;
       case 3:
-        asm_gemm_f32_j3(k, a_ptr, c_ptr, jitter->get_p_addr(),
-                        jitter->get_offset_data(), jitter->get_a_offsets(),
-                        jitter->get_c_offsets(), mask, idx);
+        asm_gemm_f32_j3(m, k, n, a_ptr, c_ptr, jitter->get_p_addr(),
+                        jitter->get_offset_data(), mask, idx);
         break;
       case 4:
-        asm_gemm_f32_j4(k, a_ptr, c_ptr, jitter->get_p_addr(),
-                        jitter->get_offset_data(), jitter->get_a_offsets(),
-                        jitter->get_c_offsets(), mask, idx);
+        asm_gemm_f32_j4(m, k, n, a_ptr, c_ptr, jitter->get_p_addr(),
+                        jitter->get_offset_data(), mask, idx);
         break;
       case 5:
-        asm_gemm_f32_j5(k, a_ptr, c_ptr, jitter->get_p_addr(),
-                        jitter->get_offset_data(), jitter->get_a_offsets(),
-                        jitter->get_c_offsets(), mask, idx);
+        asm_gemm_f32_j5(m, k, n, a_ptr, c_ptr, jitter->get_p_addr(),
+                        jitter->get_offset_data(), mask, idx);
         break;
       case 6:
-        asm_gemm_f32_j6(k, a_ptr, c_ptr, jitter->get_p_addr(),
-                        jitter->get_offset_data(), jitter->get_a_offsets(),
-                        jitter->get_c_offsets(), mask, idx);
+        asm_gemm_f32_j6(m, k, n, a_ptr, c_ptr, jitter->get_p_addr(),
+                        jitter->get_offset_data(), mask, idx);
         break;
       case 7:
-        asm_gemm_f32_j7(k, a_ptr, c_ptr, jitter->get_p_addr(),
-                        jitter->get_offset_data(), jitter->get_a_offsets(),
-                        jitter->get_c_offsets(), mask, idx);
+        asm_gemm_f32_j7(m, k, n, a_ptr, c_ptr, jitter->get_p_addr(),
+                        jitter->get_offset_data(), mask, idx);
         break;
       case 8:
-        asm_gemm_f32_j8(k, a_ptr, c_ptr, jitter->get_p_addr(),
-                        jitter->get_offset_data(), jitter->get_a_offsets(),
-                        jitter->get_c_offsets(), mask, idx);
+        asm_gemm_f32_j8(m, k, n, a_ptr, c_ptr, jitter->get_p_addr(),
+                        jitter->get_offset_data(), mask, idx);
         break;
       case 9:
-        asm_gemm_f32_j9(k, a_ptr, c_ptr, jitter->get_p_addr(),
-                        jitter->get_offset_data(), jitter->get_a_offsets(),
-                        jitter->get_c_offsets(), mask, idx);
+        asm_gemm_f32_j9(m, k, n, a_ptr, c_ptr, jitter->get_p_addr(),
+                        jitter->get_offset_data(), mask, idx);
         break;
       case 10:
-        asm_gemm_f32_j10(k, a_ptr, c_ptr, jitter->get_p_addr(),
-                         jitter->get_offset_data(), jitter->get_a_offsets(),
-                         jitter->get_c_offsets(), mask, idx);
+        asm_gemm_f32_j10(m, k, n, a_ptr, c_ptr, jitter->get_p_addr(),
+                         jitter->get_offset_data(), mask, idx);
         break;
       case 11:
-        asm_gemm_f32_j11(k, a_ptr, c_ptr, jitter->get_p_addr(),
-                         jitter->get_offset_data(), jitter->get_a_offsets(),
-                         jitter->get_c_offsets(), mask, idx);
+        asm_gemm_f32_j11(m, k, n, a_ptr, c_ptr, jitter->get_p_addr(),
+                         jitter->get_offset_data(), mask, idx);
         break;
       case 12:
-        asm_gemm_f32_j12(k, a_ptr, c_ptr, jitter->get_p_addr(),
-                         jitter->get_offset_data(), jitter->get_a_offsets(),
-                         jitter->get_c_offsets(), mask, idx);
+        asm_gemm_f32_j12(m, k, n, a_ptr, c_ptr, jitter->get_p_addr(),
+                         jitter->get_offset_data(), mask, idx);
         break;
       case 13:
-        asm_gemm_f32_j13(k, a_ptr, c_ptr, jitter->get_p_addr(),
-                         jitter->get_offset_data(), jitter->get_a_offsets(),
-                         jitter->get_c_offsets(), mask, idx);
+        asm_gemm_f32_j13(m, k, n, a_ptr, c_ptr, jitter->get_p_addr(),
+                         jitter->get_offset_data(), mask, idx);
         break;
       case 14:
-        asm_gemm_f32_j14(k, a_ptr, c_ptr, jitter->get_p_addr(),
-                         jitter->get_offset_data(), jitter->get_a_offsets(),
-                         jitter->get_c_offsets(), mask, idx);
+        asm_gemm_f32_j14(m, k, n, a_ptr, c_ptr, jitter->get_p_addr(),
+                         jitter->get_offset_data(), mask, idx);
         break;
     }
   };
@@ -200,13 +186,15 @@ inline index_t sgemm(char transa, char transb, index_t m, index_t n, index_t k,
 
   for (index_t i = 0; i < ftile_i_lim; i += 0x10) {
     for (index_t j = 0; j < ftile_j_lim; j += 0xf) {
+#ifdef ENABLE_JIT
+      a_ptr = a + i;
+      c_ptr = c + i + j * m;
+      asm_gemm(m, k, n, a_ptr, c_ptr, jitter->get_p_addr(),
+               jitter->get_offset_data(), jitter->get_mask(),
+               idx + (j / 15) * k);
+#else
       a_ptr = a + i * k;
       c_ptr = c + i * n + j;
-#ifdef ENABLE_JIT
-      asm_gemm(k, a_ptr, c_ptr, jitter->get_p_addr(), jitter->get_offset_data(),
-               jitter->get_a_offsets(), jitter->get_c_offsets(),
-               jitter->get_mask(), idx + (j / 15) * k);
-#else
       b_ptr = b + j;
       gemm_f32_j15('N', 'N', 0x10, 0xf, k, 1, a_ptr, k, b_ptr, n, 0, c_ptr, n);
 #endif
@@ -214,15 +202,21 @@ inline index_t sgemm(char transa, char transb, index_t m, index_t n, index_t k,
   }
 
   if (ptile_i_remain) {
-    a_ptr = a + ftile_i_lim * k;
-    for (index_t j = 0; j < ftile_j_lim; j += 0xf) {
-      c_ptr = c + ftile_i_lim * n + j;
 #ifdef ENABLE_JIT
-      asm_gemm(k, a_ptr, c_ptr, jitter->get_p_addr(), jitter->get_offset_data(),
-               jitter->get_a_offsets(), jitter->get_c_offsets(),
-               jitter->get_pmask(), idx + (j / 15) * k);
+    a_ptr = a + ftile_i_lim;
+#else
+    a_ptr = a + ftile_i_lim * k;
+#endif
+    for (index_t j = 0; j < ftile_j_lim; j += 0xf) {
+#ifdef ENABLE_JIT
+      c_ptr = c + ftile_i_lim + j * m;
+
+      asm_gemm(m, k, n, a_ptr, c_ptr, jitter->get_p_addr(),
+               jitter->get_offset_data(), jitter->get_pmask(),
+               idx + (j / 15) * k);
 #else
       b_ptr = b + j;
+      c_ptr = c + ftile_i_lim * n + j;
       gemm_f32_j15('N', 'N', ptile_i_remain, 0xf, k, 1, a_ptr, k, b_ptr, n, 0,
                    c_ptr, n);
 #endif
@@ -238,21 +232,25 @@ inline index_t sgemm(char transa, char transb, index_t m, index_t n, index_t k,
     b_ptr = b + ftile_j_lim;
 #endif
     for (index_t i = 0; i < ftile_i_lim; i += 0x10) {
-      a_ptr = a + i * k;
-      c_ptr = c + i * n + ftile_j_lim;
 #ifdef ENABLE_JIT
+      a_ptr = a + i;
+      c_ptr = c + i + ftile_j_lim * m;
       execute_kernel(jitter->get_mask(), ptile_j_remain);
 #else
+      a_ptr = a + i * k;
+      c_ptr = c + i * n + ftile_j_lim;
       execute_kernel(0x10, ptile_j_remain);
 #endif
     }
 
     if (ptile_i_remain) {
-      a_ptr = a + ftile_i_lim * k;
-      c_ptr = c + ftile_i_lim * n + ftile_j_lim;
 #ifdef ENABLE_JIT
+      a_ptr = a + ftile_i_lim;
+      c_ptr = c + ftile_i_lim + ftile_j_lim * m;
       execute_kernel(jitter->get_pmask(), ptile_j_remain);
 #else
+      a_ptr = a + ftile_i_lim * k;
+      c_ptr = c + ftile_i_lim * n + ftile_j_lim;
       execute_kernel(ptile_i_remain, ptile_j_remain);
 #endif
     }
