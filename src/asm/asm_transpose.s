@@ -2,8 +2,7 @@
 #	15:38 JULY 25, 2020
 #   @author: Malith Jayaweera
 
-# THE FOLLOWING SUBROUTINE MAY BE CALLED TO COMPUTE GEMM USING TILING SIZE
-# 15 B COLS AND 1 A COLS.
+# THE FOLLOWING SUBROUTINE MAY BE CALLED TO COMPUTE MAT TRANSPOSE
 #
 # CALLING SEQUENCE IS AS FOLLOWS:
 #		RDI : MATRIX A PTR
@@ -28,54 +27,54 @@ asm_transpose:
     # FUNCTION PRELOG BEGINS HERE
     pushq %rbp              
     movq %rsp, %rbp
+    # ALLOCATE STACK SPACE
+    subq $64, %rsp
+    # SAVE TO STACK
+    movq %r12, -0x8(%rbp)
+    movq %r13, -0x10(%rbp)
     # FUNC START
-   # movq (%rdi), %rax              # A
-   # movq (%rsi), %rax              # B
-   # movq (%rdx), %rax              # C
-   # movq (%rcx), %rax              # A_T
-   # movq (%r8), %rax               # C_T
     movq %r9, %rax                  # M
     movq 0x10(%rbp), %rax           # N
     movq 0x18(%rbp), %rax           # K
-    # ALLOCATE STACK SPACE
-    subq $64, %rsp
     # MOVE TO TEMP REGISTERS
     movq %rdi, %r10
     movq %rsi, %r11
     xorl %r12d, %r12d
     # START MAT TRANSPOSE
     xorl %eax, %eax                 # i
-    xorl %ebx, %ebx 
+    xorl %r13d, %r13d 
 .LPTPOSE_OUTER:
     cmpl %r9d, %eax                 # i < M
     jnb .EXITMAIN
-    xorl %ebx, %ebx                 # j
+    xorl %r13d, %r13d               # j
 .LPTPOSE_INNER:
-    cmpl 0x18(%rbp), %ebx           # j < K
+    cmpl 0x18(%rbp), %r13d          # j < K
     jnb .LPTPOSE_INNER_END
     # INDEX COMPUTATION
     movl %eax, %edi
     imul 0x18(%rbp), %edi           # i * k  
-    addl %ebx, %edi                 # i * k + j
+    addl %r13d, %edi                 # i * k + j
     leaq (%r10, %rdi, 0x4), %rdi    # 4 BYTE ALIGNED
     movq (%rdi), %rdi
-    movl %ebx, %esi                         
+    movl %r13d, %esi                         
     imul %r9d, %esi                 # j * m
     addl %eax, %esi                 # j * m + i
     leaq (%rcx, %rsi, 0x4), %rsi    # 4 BYTE ALIGNED
     # STORE
     movl %edi, (%rsi)
-    addl $1, %ebx
+    addl $1, %r13d
     jmp .LPTPOSE_INNER
 .LPTPOSE_INNER_END:
     addl $1, %eax
     jmp .LPTPOSE_OUTER
 .EXITMAIN:
+    # SAVE FROM STACK
+    movq -0x8(%rbp), %r12
+    movq -0x10(%rbp), %r13
     # DEALLOCATE STACK SPACE
     addq $64, %rsp
     # FUNCTION EPILOG BEGINS HERE
     movq %rbp, %rsp        
     pop %rbp
-    movq %r12, %rax
     ret
 
