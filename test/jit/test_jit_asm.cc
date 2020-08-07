@@ -41,18 +41,11 @@ TEST(JIT, ASM_GEMM) {
   std::shared_ptr<Jitter<float>> jitter = std::make_shared<Jitter<float>>();
   jitter->generate_code(B, m, k, n);
 
-  for (index_t i = 0; i < 100; ++i) {
-    memset(C, 0, m * n * sizeof(float));
-    memset(C_REF, 0, m * n * sizeof(float));
-    gemm<float>('T', 'N', m, n, k, 1.0, A, k, B, n, 0, C_REF, n);
-    begin = std::chrono::steady_clock::now();
-    asm_gemm(m, k, n, A, C, jitter->get_p_addr(), jitter->get_offset_data(),
-             jitter->get_pmask(), idx);
-    end = std::chrono::steady_clock::now();
-    duration =
-        std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
-    std::cout << "duration: " << duration.count() << std::endl;
-  }
+  memset(C, 0, m * n * sizeof(float));
+  memset(C_REF, 0, m * n * sizeof(float));
+  gemm<float>('T', 'N', m, n, k, 1.0, A, k, B, n, 0, C_REF, n);
+  asm_gemm(m, k, n, A, C, jitter->get_p_addr(), jitter->get_offset_data(),
+           jitter->get_pmask(), idx);
 
   // asm: col major & gemm: row major
   for (index_t i = 0; i < n; ++i) {
