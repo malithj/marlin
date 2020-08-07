@@ -230,14 +230,5 @@ TEST(Benchmark, Jitters) {
     aligned_free(results);
   };
 
-  // matrix start: 20
-  // matrix end: 105
-  // matrix increment: 5
-  // sparsity: 0
-  perf_bench(20, 105, 5, 0);
-  // matrix start: 100
-  // matrix end: 2000
-  // matrix increment: 100
-  // sparsity: 0%
-  //   perf_bench(100, 2100, 100, 0);
+  perf_bench(1, 33, 1, 0.95);
 }
