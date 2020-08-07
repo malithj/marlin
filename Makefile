@@ -1,8 +1,8 @@
 CC=g++
 CFLAGS=-march=skylake-avx512
 EXT_TARGET=ext
-EXT_FLAGS=-Wall -march=skylake-avx512 -g -D ENABLE_JIT
-TEST_FLAGS=-Wall -march=skylake-avx512 -g -D ENABLE_JIT
+EXT_FLAGS=-Wall -march=skylake-avx512 -g -D ENABLE_JIT -O2
+TEST_FLAGS=-Wall -march=skylake-avx512 -g -D ENABLE_JIT -O2
 TARGET=main
 TEST_TARGET=test
 XSMM_TARGET=xsmm
@@ -111,97 +111,97 @@ all: $(OUT_DIR) $(GOOGLE_TEST) $(TARGET)
 $(ASM_GEMM): $(SRC_DIR)/asm/asm_gemm.s
 	@echo "${LINE_COLOR}Building object file: $@${RESET_COLOR}"
 	@echo -n "${CMD_COLOR}"
-	$(CC) -o $@ -c $^
+	$(CC) -o $@ -c $^ $(TEST_FLAGS)
 	@echo "${RESET_COLOR}"
 
 $(ASM_GEMM_F32_J1): $(SRC_DIR)/asm/kernels/asm_gemm_f32_j1.s
 	@echo "${LINE_COLOR}Building object file: $@${RESET_COLOR}"
 	@echo -n "${CMD_COLOR}"
-	$(CC) -o $@ -c $^
+	$(CC) -o $@ -c $^ $(TEST_FLAGS)
 	@echo "${RESET_COLOR}"
 
 $(ASM_GEMM_F32_J2): $(SRC_DIR)/asm/kernels/asm_gemm_f32_j2.s
 	@echo "${LINE_COLOR}Building object file: $@${RESET_COLOR}"
 	@echo -n "${CMD_COLOR}"
-	$(CC) -o $@ -c $^
+	$(CC) -o $@ -c $^ $(TEST_FLAGS)
 	@echo "${RESET_COLOR}"
 
 $(ASM_GEMM_F32_J3): $(SRC_DIR)/asm/kernels/asm_gemm_f32_j3.s
 	@echo "${LINE_COLOR}Building object file: $@${RESET_COLOR}"
 	@echo -n "${CMD_COLOR}"
-	$(CC) -o $@ -c $^
+	$(CC) -o $@ -c $^ $(TEST_FLAGS)
 	@echo "${RESET_COLOR}"
 
 $(ASM_GEMM_F32_J4): $(SRC_DIR)/asm/kernels/asm_gemm_f32_j4.s
 	@echo "${LINE_COLOR}Building object file: $@${RESET_COLOR}"
 	@echo -n "${CMD_COLOR}"
-	$(CC) -o $@ -c $^
+	$(CC) -o $@ -c $^ $(TEST_FLAGS)
 	@echo "${RESET_COLOR}"
 
 $(ASM_GEMM_F32_J5): $(SRC_DIR)/asm/kernels/asm_gemm_f32_j5.s
 	@echo "${LINE_COLOR}Building object file: $@${RESET_COLOR}"
 	@echo -n "${CMD_COLOR}"
-	$(CC) -o $@ -c $^
+	$(CC) -o $@ -c $^ $(TEST_FLAGS)
 	@echo "${RESET_COLOR}"
 
 $(ASM_GEMM_F32_J6): $(SRC_DIR)/asm/kernels/asm_gemm_f32_j6.s
 	@echo "${LINE_COLOR}Building object file: $@${RESET_COLOR}"
 	@echo -n "${CMD_COLOR}"
-	$(CC) -o $@ -c $^
+	$(CC) -o $@ -c $^ $(TEST_FLAGS)
 	@echo "${RESET_COLOR}"
 
 $(ASM_GEMM_F32_J7): $(SRC_DIR)/asm/kernels/asm_gemm_f32_j7.s
 	@echo "${LINE_COLOR}Building object file: $@${RESET_COLOR}"
 	@echo -n "${CMD_COLOR}"
-	$(CC) -o $@ -c $^
+	$(CC) -o $@ -c $^ $(TEST_FLAGS)
 	@echo "${RESET_COLOR}"
 
 $(ASM_GEMM_F32_J8): $(SRC_DIR)/asm/kernels/asm_gemm_f32_j8.s
 	@echo "${LINE_COLOR}Building object file: $@${RESET_COLOR}"
 	@echo -n "${CMD_COLOR}"
-	$(CC) -o $@ -c $^
+	$(CC) -o $@ -c $^ $(TEST_FLAGS)
 	@echo "${RESET_COLOR}"
 
 $(ASM_GEMM_F32_J9): $(SRC_DIR)/asm/kernels/asm_gemm_f32_j9.s
 	@echo "${LINE_COLOR}Building object file: $@${RESET_COLOR}"
 	@echo -n "${CMD_COLOR}"
-	$(CC) -o $@ -c $^
+	$(CC) -o $@ -c $^ $(TEST_FLAGS)
 	@echo "${RESET_COLOR}"
 
 $(ASM_GEMM_F32_J10): $(SRC_DIR)/asm/kernels/asm_gemm_f32_j10.s
 	@echo "${LINE_COLOR}Building object file: $@${RESET_COLOR}"
 	@echo -n "${CMD_COLOR}"
-	$(CC) -o $@ -c $^
+	$(CC) -o $@ -c $^ $(TEST_FLAGS)
 	@echo "${RESET_COLOR}"
 
 $(ASM_GEMM_F32_J11): $(SRC_DIR)/asm/kernels/asm_gemm_f32_j11.s
 	@echo "${LINE_COLOR}Building object file: $@${RESET_COLOR}"
 	@echo -n "${CMD_COLOR}"
-	$(CC) -o $@ -c $^
+	$(CC) -o $@ -c $^ $(TEST_FLAGS)
 	@echo "${RESET_COLOR}"
 
 $(ASM_GEMM_F32_J12): $(SRC_DIR)/asm/kernels/asm_gemm_f32_j12.s
 	@echo "${LINE_COLOR}Building object file: $@${RESET_COLOR}"
 	@echo -n "${CMD_COLOR}"
-	$(CC) -o $@ -c $^
+	$(CC) -o $@ -c $^ $(TEST_FLAGS)
 	@echo "${RESET_COLOR}"
 
 $(ASM_GEMM_F32_J13): $(SRC_DIR)/asm/kernels/asm_gemm_f32_j13.s
 	@echo "${LINE_COLOR}Building object file: $@${RESET_COLOR}"
 	@echo -n "${CMD_COLOR}"
-	$(CC) -o $@ -c $^
+	$(CC) -o $@ -c $^ $(TEST_FLAGS)
 	@echo "${RESET_COLOR}"
 
 $(ASM_GEMM_F32_J14): $(SRC_DIR)/asm/kernels/asm_gemm_f32_j14.s
 	@echo "${LINE_COLOR}Building object file: $@${RESET_COLOR}"
 	@echo -n "${CMD_COLOR}"
-	$(CC) -o $@ -c $^
+	$(CC) -o $@ -c $^ $(TEST_FLAGS)
 	@echo "${RESET_COLOR}"
 
 $(ASM_TRANSPOSE): $(SRC_DIR)/asm/asm_transpose.s
 	@echo "${LINE_COLOR}Building object file: $@${RESET_COLOR}"
 	@echo -n "${CMD_COLOR}"
-	$(CC) -o $@ -c $^
+	$(CC) -o $@ -c $^ $(TEST_FLAGS)
 	@echo "${RESET_COLOR}"
 
 $(BENCHMARK): $(TEST_DIR)/ext/benchmark.cc
