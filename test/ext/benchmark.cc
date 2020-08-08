@@ -76,11 +76,11 @@ TEST(Benchmark, Jitters) {
 
     for (index_t mat_size = mat_strt; mat_size < mat_end; mat_size += mat_inc) {
       m = k = n = mat_size;
-      float *A = static_cast<float *>(
+      A = static_cast<float *>(
           _mm_malloc(m * k * sizeof(float), ALIGN_BYTE_SIZE));
-      float *B = static_cast<float *>(
+      B = static_cast<float *>(
           _mm_malloc(k * n * sizeof(float), ALIGN_BYTE_SIZE));
-      float *C = static_cast<float *>(
+      C = static_cast<float *>(
           _mm_malloc(m * n * sizeof(float), ALIGN_BYTE_SIZE));
       for (index_t h = 0; h < m; ++h) {
         for (index_t w = 0; w < k; ++w) {
