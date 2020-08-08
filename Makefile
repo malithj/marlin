@@ -1,8 +1,8 @@
 CC=g++
 CFLAGS=-march=skylake-avx512
 EXT_TARGET=ext
-EXT_FLAGS=-Wall -march=skylake-avx512 -g -D ENABLE_JIT -O2
-TEST_FLAGS=-Wall -march=skylake-avx512 -g -D ENABLE_JIT -O2
+EXT_FLAGS=-Wall -march=skylake-avx512 -DENABLE_JIT -O2 -fPIC -fprefetch-loop-arrays -falign-functions=16 -falign-loops=16 -flto -fuse-linker-plugin -funroll-loops -Wl,--gc-sections -fdata-sections -ffunction-sections -fvisibility=hidden
+TEST_FLAGS=-Wall -march=skylake-avx512 -DENABLE_JIT -O2 -fPIC -fprefetch-loop-arrays -falign-functions=16 -falign-loops=16 -flto -fuse-linker-plugin -funroll-loops -Wl,--gc-sections -fdata-sections -ffunction-sections -fvisibility=hidden
 TARGET=main
 TEST_TARGET=test
 XSMM_TARGET=xsmm
