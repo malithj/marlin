@@ -234,5 +234,5 @@ TEST(Benchmark, Jitters) {
     aligned_free(results);
   };
 
-  perf_bench(1, 33, 1, 0.95);
+  perf_bench(1, 33, 1, 0);
 }
