@@ -52,6 +52,10 @@ TEST(Benchmark, Jitters) {
     libxsmm_mmfunction<float> xsmm_wm_kernel(LIBXSMM_GEMM_FLAG_NONE, m, n, k,
                                              1.0 /*alpha*/, 1.0 /*beta*/);
 
+#ifdef ENABLE_JIT
+    std::shared_ptr<Jitter<float>> jit_wm = std::make_shared<Jitter<float>>();
+#endif
+
     // rounds of warming up
     for (index_t i = 0; i < 10; ++i) {
       mkl_sgemm(jitter, A, B, C);
