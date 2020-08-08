@@ -169,15 +169,11 @@ TEST(Benchmark, Jitters) {
         results[itr_strt + 3] = duration.count() / 1000.0f;
 
         begin = std::chrono::steady_clock::now();
-#ifdef ENABLE_JIT
-        MARLIN::sgemm('N', 'N', m, n, k, 1.0, A, k, B, n, 0, C, n, jit_);
-#else
-        MARLIN::sgemm('N', 'N', m, n, k, 1.0, A, k, B, n, 0, C, n);
-#endif
+        xsmm_kernel(A, B, C);
         end = std::chrono::steady_clock::now();
         duration =
             std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
-        results[itr_strt + 4] += duration.count() / 1000.0f;
+        results[itr_strt + 6] += duration.count() / 1000.0f;
 
         begin = std::chrono::steady_clock::now();
         mkl_sgemm(jitter, A, B, C);
@@ -187,11 +183,15 @@ TEST(Benchmark, Jitters) {
         results[itr_strt + 5] += duration.count() / 1000.0f;
 
         begin = std::chrono::steady_clock::now();
-        xsmm_kernel(A, B, C);
+#ifdef ENABLE_JIT
+        MARLIN::sgemm('N', 'N', m, n, k, 1.0, A, k, B, n, 0, C, n, jit_);
+#else
+        MARLIN::sgemm('N', 'N', m, n, k, 1.0, A, k, B, n, 0, C, n);
+#endif
         end = std::chrono::steady_clock::now();
         duration =
             std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
-        results[itr_strt + 6] += duration.count() / 1000.0f;
+        results[itr_strt + 4] += duration.count() / 1000.0f;
 
         begin = std::chrono::steady_clock::now();
         eigen_C = eigen_A * eigen_B;
