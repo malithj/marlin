@@ -110,7 +110,6 @@ TEST(Benchmark, Jitters) {
       const index_t itr_strt = offset + 0;
       results[itr_strt + 4] = duration.count() / 1000.0f;
 
-      void *jitter;
       begin = std::chrono::steady_clock::now();
       mkl_jit_status_t status =
           mkl_jit_create_sgemm(&jitter, MKL_ROW_MAJOR, MKL_NOTRANS, MKL_NOTRANS,
