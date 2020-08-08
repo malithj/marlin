@@ -242,20 +242,19 @@ inline index_t sgemm(char transa, char transb, index_t m, index_t n, index_t k,
       execute_kernel(0x10, ptile_j_remain);
 #endif
     }
-
-    if (ptile_i_remain) {
-#ifdef ENABLE_JIT
-      a_ptr = a + ftile_i_lim;
-      c_ptr = c + ftile_i_lim + ftile_j_lim * m;
-      execute_kernel(jitter->get_pmask(), ptile_j_remain);
-#else
-      a_ptr = a + ftile_i_lim * k;
-      c_ptr = c + ftile_i_lim * n + ftile_j_lim;
-      execute_kernel(ptile_i_remain, ptile_j_remain);
-#endif
-    }
   }
 
+  if (ptile_i_remain && ptile_j_remain) {
+#ifdef ENABLE_JIT
+    a_ptr = a + ftile_i_lim;
+    c_ptr = c + ftile_i_lim + ftile_j_lim * m;
+    execute_kernel(jitter->get_pmask(), ptile_j_remain);
+#else
+    a_ptr = a + ftile_i_lim * k;
+    c_ptr = c + ftile_i_lim * n + ftile_j_lim;
+    execute_kernel(ptile_i_remain, ptile_j_remain);
+#endif
+  }
   return 1;
 }
 }  // namespace MARLIN
