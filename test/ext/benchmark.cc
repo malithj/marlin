@@ -50,7 +50,7 @@ TEST(Benchmark, Jitters) {
     auto dynamic_matmul = dynamic_matmul_create(eng, beta);
 
     libxsmm_mmfunction<float> xsmm_wm_kernel(LIBXSMM_GEMM_FLAG_NONE, m, n, k,
-                                             1.0 /*alpha*/, 1.0 /*beta*/);
+                                             alpha, beta);
 
     // rounds of warming up
     for (index_t i = 0; i < 10; ++i) {
