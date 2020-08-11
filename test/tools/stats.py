@@ -102,13 +102,12 @@ def iterate_over_matrix_sizes(mat_start: np.int64, mat_end: np.int64,
     df.insert(0, 'MAT', np.repeat(np.arange(mat_start, mat_end, mat_inc), num_modes))
     df.insert(1, 'MODE', np.tile(np.asarray(modes_list, dtype=np.object),
                                   np.int64((mat_end - mat_start) / mat_inc)))
-    print(df)
-    df.to_csv('build/results/stats_{0:}_{1:}_{2:}_{3:.2f}.csv'.
-             format(mat_start, mat_end, mat_inc, sparsity))
+    df.to_csv('build/results/stats_{0:}_{1:}_{2:}_{3:.2f}_{4:}.csv'.format
+              (mat_start, mat_end, mat_inc, sparsity, iterations))
 
 
 def main():
-    iterate_over_matrix_sizes(1, 5, 1, 0, 100)
+    iterate_over_matrix_sizes(1, 32, 1, 0, 100)
 
 
 if __name__ == '__main__':
