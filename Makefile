@@ -3,6 +3,7 @@ CFLAGS=-march=skylake-avx512
 EXT_TARGET=ext
 EXT_FLAGS=-Wall -march=skylake-avx512 -DENABLE_JIT -O2 -fPIC -fprefetch-loop-arrays -falign-functions=16 -falign-loops=16 -flto -fuse-linker-plugin -funroll-loops -Wl,--gc-sections -fdata-sections -ffunction-sections -fvisibility=hidden
 TEST_FLAGS=-Wall -march=skylake-avx512 -DENABLE_JIT -O2 -fPIC -fprefetch-loop-arrays -falign-functions=16 -falign-loops=16 -flto -fuse-linker-plugin -funroll-loops -Wl,--gc-sections -fdata-sections -ffunction-sections -fvisibility=hidden
+PERF_TARGET=perf
 TARGET=main
 TEST_TARGET=test
 XSMM_TARGET=xsmm
@@ -51,6 +52,7 @@ BENCHMARK_O=benchmark.o
 EXT_O=ext.o
 MAIN_O=main.o
 ODIR=$(BUILD_DIR)/bin
+PERF_O=perf.o
 TEST_O=test.o
 TEST_GATHER_O=test_gather.o
 TEST_GEMM_O=test_gemm.o
@@ -87,6 +89,7 @@ BENCHMARK=$(patsubst %,$(ODIR)/%,$(BENCHMARK_O))
 EXT=$(patsubst %,$(ODIR)/%,$(EXT_O))
 MAIN=$(patsubst %,$(ODIR)/%,$(MAIN_O))
 OUT_DIR=$(ODIR)
+PERF=$(patsubst %,$(ODIR)/%,$(PERF_O))
 TEST=$(patsubst %,$(ODIR)/%,$(TEST_O))
 TEST_GATHER=$(patsubst %,$(ODIR)/%,$(TEST_GATHER_O))
 TEST_GEMM=$(patsubst %,$(ODIR)/%,$(TEST_GEMM_O))
@@ -236,6 +239,12 @@ $(OUT_DIR):
 	${MKDIR_P} ${BUILD_DIR}/$(RESULT_DIR)
 	@echo "${RESET_COLOR}"
 
+$(PERF): $(TEST_DIR)/perf/main.cc
+	@echo "${LINE_COLOR}Building object file: $@${RESET_COLOR}"
+	@echo -n "${CMD_COLOR}"
+	$(CC) -o $@ -c $^ $(EXT_FLAGS) -I $(INCLUDE_DIR) -I $(GOOGLE_TEST)/$(GOOGLE_TEST)/include -I $(ONEDNN_INC_DIR) -I ${ONEDNN_CFG_INC_DIR} -I $(MKL_INC_DIR)  -I $(LIBXSMM_INC_DIR) -I ${EIGEN_INC_DIR} -I ${OPENBLAS_INC} 
+	@echo "${RESET_COLOR}"
+
 $(TEST): $(TEST_DIR)/main.cc
 	@echo "${LINE_COLOR}Building object file: $@${RESET_COLOR}"	
 	@echo -n "${CMD_COLOR}"
@@ -333,6 +342,11 @@ main: $(MAIN) $(VTUNE_LIB_DIR)/libjitprofiling.a
 	@echo "${RESET_COLOR}"
 	@echo "${LINE_COLOR}BUILD SUCCESSFUL${RESET_COLOR}"
 
+perf: $(PERF) $(ASM_GEMM) $(ASM_GEMM_F32_J1) $(ASM_GEMM_F32_J2) $(ASM_GEMM_F32_J3) $(ASM_GEMM_F32_J4) $(ASM_GEMM_F32_J5) $(ASM_GEMM_F32_J6) $(ASM_GEMM_F32_J7) $(ASM_GEMM_F32_J8) $(ASM_GEMM_F32_J9) $(ASM_GEMM_F32_J10) $(ASM_GEMM_F32_J11) $(ASM_GEMM_F32_J12) $(ASM_GEMM_F32_J13) $(ASM_GEMM_F32_J14)
+	@echo "${LINE_COLOR}Linking object file $@ with $^${RESET_COLOR}"
+	@echo -n "${CMD_COLOR}"
+	$(CC) -o $(BUILD_DIR)/$@ $^ $(TEST_FLAGS) -DMKL_ILP64 -m64 -I $(INCLUDE_DIR) -I $(ONEDNN_INC_DIR) -I ${ONEDNN_CFG_INC_DIR} -L $(ONEDNN_LIB_DIR) -I $(MKL_INC_DIR) -L $(MKL_LIB_DIR) -L $(LIBXSMM_LIB_DIR) -L $(OPENBLAS_LIB_DIR) -lopenblas -lxsmm -ldnnl -Wl,--no-as-needed -lmkl_intel_ilp64 -lmkl_sequential -lmkl_core -lpthread -lm -ldl
+
 test: $(TEST) $(TEST_GEMM_KERNEL) $(TEST_GEMM_F32) $(TEST_JIT) $(TEST_JIT_ASM) $(TEST_JIT_GEMM) $(TEST_JIT_KERNEL) $(TEST_GATHER) $(TEST_SCATTER) $(TEST_TRANSPOSE) $(ASM_GEMM) $(ASM_GEMM_F32_J1) $(ASM_GEMM_F32_J2) $(ASM_GEMM_F32_J3) $(ASM_GEMM_F32_J4) $(ASM_GEMM_F32_J5) $(ASM_GEMM_F32_J6) $(ASM_GEMM_F32_J7) $(ASM_GEMM_F32_J8) $(ASM_GEMM_F32_J9) $(ASM_GEMM_F32_J10) $(ASM_GEMM_F32_J11) $(ASM_GEMM_F32_J12) $(ASM_GEMM_F32_J13) $(ASM_GEMM_F32_J14) $(ASM_TRANSPOSE) $(TEST_GEMM) $(TEST_GEMM_CUSTOM) $(BUILD_DIR)/$(GOOGLE_TEST)/lib/libgtest.a
 	@echo "${LINE_COLOR}Linking object file $@ with $^${RESET_COLOR}"
 	@echo -n "${CMD_COLOR}"
@@ -347,5 +361,5 @@ xsmm: $(XSMM) $(TEST_XSMM) $(BUILD_DIR)/$(GOOGLE_TEST)/lib/libgtest.a
 
 clean:
 	@echo -n "${CMD_COLOR}"
-	rm -f $(ODIR)/*.o $(BUILD_DIR)/*~ $(BUILD_DIR)/$(TARGET) $(BUILD_DIR)/$(TEST_TARGET) $(BUILD_DIR)/$(EXT_TARGET)
+	rm -f $(ODIR)/*.o $(BUILD_DIR)/*~ $(BUILD_DIR)/$(TARGET) $(BUILD_DIR)/$(TEST_TARGET) $(BUILD_DIR)/$(EXT_TARGET) $(BUILD_DIR)/$(PERF_TARGET)
 	@echo -n "${RESET_COLOR}"
