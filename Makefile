@@ -3,10 +3,12 @@ CFLAGS=-march=skylake-avx512
 EXT_TARGET=ext
 EXT_FLAGS=-Wall -march=skylake-avx512 -DENABLE_JIT -O2 -fPIC -fprefetch-loop-arrays -falign-functions=16 -falign-loops=16 -flto -fuse-linker-plugin -funroll-loops -Wl,--gc-sections -fdata-sections -ffunction-sections -fvisibility=hidden
 TEST_FLAGS=-Wall -march=skylake-avx512 -DENABLE_JIT -O2 -fPIC -fprefetch-loop-arrays -falign-functions=16 -falign-loops=16 -flto -fuse-linker-plugin -funroll-loops -Wl,--gc-sections -fdata-sections -ffunction-sections -fvisibility=hidden
+LIB_FLAGS=-fPIC -g
 PERF_TARGET=perf
 TARGET=main
 TEST_TARGET=test
 XSMM_TARGET=xsmm
+LIB_TARGET=libmarlin
 BUILD_DIR=build
 SRC_DIR=src
 TEST_DIR=test
@@ -333,7 +335,7 @@ $(XSMM): $(TEST_DIR)/xsmm/main.cc
 ext: $(EXT) $(BENCHMARK) $(ASM_GEMM) $(ASM_GEMM_F32_J1) $(ASM_GEMM_F32_J2) $(ASM_GEMM_F32_J3) $(ASM_GEMM_F32_J4) $(ASM_GEMM_F32_J5) $(ASM_GEMM_F32_J6) $(ASM_GEMM_F32_J7) $(ASM_GEMM_F32_J8) $(ASM_GEMM_F32_J9) $(ASM_GEMM_F32_J10) $(ASM_GEMM_F32_J11) $(ASM_GEMM_F32_J12) $(ASM_GEMM_F32_J13) $(ASM_GEMM_F32_J14) $(BUILD_DIR)/$(GOOGLE_TEST)/lib/libgtest.a
 	@echo "${LINE_COLOR}Linking object file $@ with $^${RESET_COLOR}"
 	@echo -n "${CMD_COLOR}"
-	$(CC) -o $(BUILD_DIR)/$@ $^ $(TEST_FLAGS) -DMKL_ILP64 -m64 -I $(INCLUDE_DIR) -I $(GOOGLE_TEST)/$(GOOGLE_TEST)/include -I $(ONEDNN_INC_DIR) -I ${ONEDNN_CFG_INC_DIR} -L $(ONEDNN_LIB_DIR) -I $(MKL_INC_DIR) -L $(MKL_LIB_DIR) -L $(LIBXSMM_LIB_DIR) -L $(OPENBLAS_LIB_DIR) -lopenblas -lxsmm -ldnnl -Wl,--no-as-needed -lmkl_intel_ilp64 -lmkl_sequential -lmkl_core -lpthread -lm -ldl
+	$(CC) -o $(BUILD_DIR)/$@ $^ $(TEST_FLAGS) -DMKL_ILP64 -m64 -I $(INCLUDE_DIR) -I $(GOOGLE_TEST)/$(GOOGLE_TEST)/include -I $(ONEDNN_INC_DIR) -I ${ONEDNN_CFG_INC_DIR} -L $(ONEDNN_LIB_DIR) -I $(MKL_INC_DIR) -L $(MKL_LIB_DIR) -L $(LIBXSMM_LIB_DIR) -lxsmm -ldnnl -Wl,--no-as-needed -lmkl_intel_ilp64 -lmkl_sequential -lmkl_core -lpthread -lm -ldl
 
 main: $(MAIN) $(VTUNE_LIB_DIR)/libjitprofiling.a
 	@echo "${LINE_COLOR}Linking object file $@ with $^${RESET_COLOR}"
@@ -357,9 +359,14 @@ xsmm: $(XSMM) $(TEST_XSMM) $(BUILD_DIR)/$(GOOGLE_TEST)/lib/libgtest.a
 	@echo -n "${CMD_COLOR}"
 	$(CC) -o $(BUILD_DIR)/$@ $^ $(TEST_FLAGS) -I $(INCLUDE_DIR) -I $(GOOGLE_TEST)/$(GOOGLE_TEST)/include -I $(MKL_INC_DIR) -L $(MKL_LIB_DIR) -L $(LIBXSMM_LIB_DIR) -L $(OPENBLAS_LIB_DIR) -lopenblas -lxsmm -Wl,--no-as-needed -lmkl_intel_ilp64 -lmkl_sequential -lmkl_core -lpthread -lm -ldl
 
+libmarlin: $(ASM_GEMM) $(ASM_GEMM_F32_J1) $(ASM_GEMM_F32_J2) $(ASM_GEMM_F32_J3) $(ASM_GEMM_F32_J4) $(ASM_GEMM_F32_J5) $(ASM_GEMM_F32_J6) $(ASM_GEMM_F32_J7) $(ASM_GEMM_F32_J8) $(ASM_GEMM_F32_J9) $(ASM_GEMM_F32_J10) $(ASM_GEMM_F32_J11) $(ASM_GEMM_F32_J12) $(ASM_GEMM_F32_J13) $(ASM_GEMM_F32_J14) $(ASM_TRANSPOSE)
+	@echo "${LINE_COLOR}Building library $@ packaging $^${RESET_COLOR}"	
+	@echo -n "${CMD_COLOR}"
+	$(CC) -shared -o $(BUILD_DIR)/$@.so $^ $(LIB_FLAGS) -I $(INCLUDE_DIR)
+
 .PHONY: clean googletest
 
 clean:
 	@echo -n "${CMD_COLOR}"
-	rm -f $(ODIR)/*.o $(BUILD_DIR)/*~ $(BUILD_DIR)/$(TARGET) $(BUILD_DIR)/$(TEST_TARGET) $(BUILD_DIR)/$(EXT_TARGET) $(BUILD_DIR)/$(PERF_TARGET)
+	rm -f $(ODIR)/*.o $(BUILD_DIR)/*~ $(BUILD_DIR)/$(TARGET) $(BUILD_DIR)/$(TEST_TARGET) $(BUILD_DIR)/$(EXT_TARGET) $(BUILD_DIR)/$(PERF_TARGET) $(BUILD_DIR)/$(LIB_TARGET)
 	@echo -n "${RESET_COLOR}"
