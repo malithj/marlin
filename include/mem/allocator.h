@@ -63,13 +63,16 @@ void Allocator<T>::free(void* addr) {
 template <typename T>
 void* Allocator<T>::resize(void* base_ptr, size_t size) {
   index_t offset = ALIGN_SIZE - 1 + sizeof(void*);
-  index_t total_size = size + offset;
+  index_t total_size = size * sizeof(T) + offset;
   void* original_ptr = reinterpret_cast<void**>(base_ptr)[-1];
   void* ptr = std::realloc(original_ptr, total_size);
   if (ptr == nullptr) {
     return reinterpret_cast<void*>(base_ptr);
   }
-  return reinterpret_cast<T*>(ptr);
+  void** aligned_ptr = reinterpret_cast<void**>(
+      (reinterpret_cast<size_t>(ptr) + offset) & ~(ALIGN_SIZE - 1));
+  aligned_ptr[-1] = ptr;
+  return reinterpret_cast<T*>(aligned_ptr);
 }
 
 template <typename T>
