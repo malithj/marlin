@@ -96,6 +96,8 @@ void Jitter<T>::generate_code(T* matrix, int m, int k, int n) {
   if (this->store == nullptr) {
     this->store = std::make_shared<CodeStore<T>>();
   }
+  this->code_buffer->clear();
+  this->offset_buffer->clear();
   this->bytecode = std::make_shared<ByteCode>(code_buffer, offset_buffer);
   this->codelet = std::make_shared<Codelet>();
   store->generate_b_matrix(matrix, k, n, bytecode);
@@ -103,17 +105,8 @@ void Jitter<T>::generate_code(T* matrix, int m, int k, int n) {
   this->p_addr = codelet->get_p_addr();
   this->page_size_bytes = codelet->get_page_size_bytes();
   this->offset_data = this->bytecode->get_offset_buffer()->mutable_data();
-  // this->arr_a_offsets = new uint32_t[16];
-  // this->arr_c_offsets = new uint32_t[16];
   this->mask = 0xffff;
   this->pmask = ~(0xffff << (m & 0xf));
-
-  // for (uint32_t i = 0; i < 16; ++i) {
-  //   arr_a_offsets[i] = i * k;
-  // }
-  // for (uint32_t i = 0; i < 16; ++i) {
-  //   arr_c_offsets[i] = i * n;
-  // }
 }
 
 template <typename T>
