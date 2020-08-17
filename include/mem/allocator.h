@@ -42,10 +42,10 @@ Allocator<T>::Allocator() {
 template <typename T>
 void* Allocator<T>::allocate(size_t size) {
   index_t offset = ALIGN_SIZE - 1 + sizeof(void*);
-  index_t total_size = size + offset;
+  index_t total_size = size * sizeof(T) + offset;
   void* ptr;
   try {
-    ptr = std::malloc(total_size * sizeof(T));
+    ptr = std::malloc(total_size);
   } catch (std::exception& e) {
     throw std::bad_alloc();
   }
