@@ -115,7 +115,8 @@ bool Buffer<T>::resize(index_t size) {
     this->base_ptr = this->allocator->allocate(size);
     this->_size = size;
   } else {
-    throw std::runtime_error("buffer already allocated");
+    this->base_ptr = this->allocator->resize(base_ptr, size);
+    this->_size = size;
   }
   return true;
 }
