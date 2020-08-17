@@ -97,7 +97,7 @@ def iterate_over_matrix_sizes(mat_start: np.int64, mat_end: np.int64,
     col_names = ['L1-DCACHE-HITS', 'L1-DCACHE-MISSES', 'L1-ICACHE-HITS', 'L1-ICACHE-MISSES', 'L2-HITS', 'L2-MISSES', 'L3-HITS', 'L3-MISSES', 'DTLB-LOADS', 'DTLB-LOAD-MISSES', 'ITLB-LOADS', 'ITLB-LOAD-MISSES', 'PAGE-FAULTS', 'MINOR-FAULTS', 'MAJOR-FAULTS']
     df = pd.DataFrame(data=results, columns=col_names)
     df = df.replace(-1, np.nan)
-    modes_list = ['DYN_1DNN', 'STAT_1DNN', 'SGEMM_1DNN', 'MARLIN', 'MKL', 'LIBXSMM', 'EIGEN', 'OPENBLAS']
+    modes_list = ['oneDNN dynamic', 'oneDNN static', 'oneDNN sgemm', 'MARLIN', 'Intel MKL', 'LIBXSMM', 'Eigen', 'OpenBLAS']
     df.index.name = 'IDX'
     df.insert(0, 'MAT', np.repeat(np.arange(mat_start, mat_end, mat_inc), num_modes))
     df.insert(1, 'MODE', np.tile(np.asarray(modes_list, dtype=np.object),
@@ -107,7 +107,7 @@ def iterate_over_matrix_sizes(mat_start: np.int64, mat_end: np.int64,
 
 
 def main():
-    iterate_over_matrix_sizes(1, 32, 1, 0, 100)
+    iterate_over_matrix_sizes(1, 33, 1, 0, 100)
 
 
 if __name__ == '__main__':
