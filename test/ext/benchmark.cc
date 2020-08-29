@@ -188,9 +188,9 @@ TEST(Benchmark, Jitters) {
 
         // execute static matmul
         begin = std::chrono::steady_clock::now();
-        engine eng(engine::kind::cpu, 0);  // engine
+        engine eng_(engine::kind::cpu, 0);  // engine
         for (index_t i = 0; i < iterations; ++i) {
-          static_matmul_create_and_execute(eng, 'N', 'N', m, n, k, alpha,
+          static_matmul_create_and_execute(eng_, 'N', 'N', m, n, k, alpha,
                                            A_ROW_MAJOR, k, B_ROW_MAJOR, n, beta,
                                            C, n);
         }
