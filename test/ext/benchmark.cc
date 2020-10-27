@@ -270,5 +270,7 @@ TEST(Benchmark, Jitters) {
   // mat_k
   // sparsity
   // iterations
+  perf_bench(1, 51, 1, 4, 32, 4, 2, 0, 100);
+  perf_bench(1, 51, 1, 4, 32, 4, 4, 0, 100);
   perf_bench(1, 51, 1, 4, 32, 4, 10, 0, 100);
 }

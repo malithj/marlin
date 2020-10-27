@@ -136,7 +136,7 @@ int main(int argc, char *argv[]) {
     void *jitter;
     mkl_jit_status_t status =
         mkl_jit_create_sgemm(&jitter, MKL_COL_MAJOR, MKL_NOTRANS, MKL_NOTRANS,
-                             m, n, k, alpha, k, n, beta, n);
+                             m, n, k, alpha, m, k, beta, m);
     if (MKL_JIT_ERROR == status) {
       throw std::runtime_error(
           "insufficient memory to JIT and store the DGEMM kernel");
