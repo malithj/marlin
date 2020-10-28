@@ -121,7 +121,7 @@ def iterate_over_matrix_sizes(mat_m_start: np.int64, mat_m_end: np.int64,
 
 
 def main():
-    iterate_over_matrix_sizes(1, 51, 1, 8, 16, 4, 4, 0, 1000)
+    iterate_over_matrix_sizes(1, 51, 1, 80, 120, 10, 100, 0, 1000)
 
 
 if __name__ == '__main__':
