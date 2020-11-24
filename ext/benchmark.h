@@ -9,9 +9,10 @@
 #include <chrono>
 #include <fstream>
 
-#include "../../include/gemm/gemm_f32.h"
-#include "../../include/mem/memory.h"
+#include "gemm/gemm_f32.h"
 #include "gtest/gtest.h"
+#include "jit/jitter.h"
+#include "mem/memory.h"
 using namespace testing;
 using namespace Eigen;
 
