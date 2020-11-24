@@ -49,7 +49,7 @@ TEST_OBJ = $(wildcard test/*.cc) $(wildcard test/*/*.cc)
 EXT_OBJ = benchmark.o main.o
 PERF_OBJ = main.o
 
-DEPS = $(IDIR) $(LIBXSMM_INC_DIR) 
+DEPS = $(IDIR) $(wildcard $(IDIR)/*/*.h) $(wildcard $(IDIR)/*/*/*.h) $(LIBXSMM_INC_DIR) 
 INC = -I $(IDIR) -I $(GOOGLE_TEST)/$(GOOGLE_TEST)/include -I $(LIBXSMM_INC_DIR) 
 MKL_LINK_ADVISOR=-Wl,--no-as-needed -lmkl_intel_ilp64 -lmkl_sequential -lmkl_core -lpthread -lm -ldl
 EXT_INC = -I $(ONEDNN_INC_DIR) -I ${ONEDNN_CFG_INC_DIR} -I $(MKL_INC_DIR) -I ${EIGEN_INC_DIR} 
