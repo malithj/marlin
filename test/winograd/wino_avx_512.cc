@@ -5,7 +5,7 @@
 #include "conv/direct/direct_convolver.h"
 #include "gtest/gtest.h"
 
-TEST(Winograd, InputLoad) {
+TEST(Winograd, AVX) {
   Winograd<float, WINO_K_3x3, WINO_O_2x2> winograd;
   std::shared_ptr<Tensor<float>> input = std::make_shared<Tensor<float>>();
   std::shared_ptr<Tensor<float>> filter = std::make_shared<Tensor<float>>(true);
