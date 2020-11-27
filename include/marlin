@@ -1,0 +1,8 @@
+#ifndef __MARLIN_H__
+#define __MARLIN_H__
+
+#include "conv/winograd/wino_impl.h"
+#include "mem/memory.h"
+#include "tensor/tensor.h"
+
+#endif
