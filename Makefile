@@ -3,6 +3,7 @@ CFLAGS					= -march=skylake-avx512
 EXT_TARGET				= ext
 EXT_FLAGS				= -Wall -march=skylake-avx512 -DENABLE_JIT -O2 -fPIC -fprefetch-loop-arrays -falign-functions=16 -falign-loops=16 -flto -fuse-linker-plugin -funroll-loops -Wl,--gc-sections -fdata-sections -ffunction-sections -fvisibility=hidden
 TEST_FLAGS				= -Wall -march=skylake-avx512 -DENABLE_JIT -O2 -fPIC -fprefetch-loop-arrays -falign-functions=16 -falign-loops=16 -flto -fuse-linker-plugin -funroll-loops -Wl,--gc-sections -fdata-sections -ffunction-sections -fvisibility=hidden
+CFLAGS					= -fPIC -g $(TEST_FLAGS)
 LIB_FLAGS				= -fPIC -g $(TEST_FLAGS)
 PERF_TARGET				= perf_marlin
 TARGET					= libmarlin
@@ -95,7 +96,7 @@ $(OUT_DIR):
 $(TEST_TARGET): $(TEST_OBJ_WITH_PATH) $(ASM_OBJ_WITH_PATH)
 	@echo "${LINE_COLOR}building executable: $@${RESET_COLOR}"
 	@echo -n "${CMD_COLOR}"
-	$(CC) -o $(BUILD_DIR)/$@ $^ $(CFLAGS) $(LIBS)
+	$(CC) -o $(BUILD_DIR)/$@ $^ $(TEST_FLAGS) $(LIBS)
 	@echo "${RESET_COLOR}"
 
 $(EXT_TARGET): $(ASM_OBJ_WITH_PATH) $(EXT_OBJ_WITH_PATH)
