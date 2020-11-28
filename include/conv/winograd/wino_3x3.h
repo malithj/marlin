@@ -63,7 +63,7 @@ void wino_transform_input_3x3_2x2(const T* input, const index_t batch,
 
           int index[16];
           for (index_t i = 0; i < 16; ++i) {
-            index[i] = i * tile_count * in_channels;
+            index[i] = i * stride;
           }
 
           // store output
