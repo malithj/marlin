@@ -321,7 +321,6 @@ void Winograd<T, W, O>::unpad_output(std::shared_ptr<Tensor<T>> output,
   const index_t img_size = height * width;
   const index_t padded_img_size = padded_height * padded_width;
 
-#pragma omp parallel for collapse(2)
   for (index_t b = 0; b < batch; ++b) {
     for (index_t c = 0; c < channels; ++c) {
       const index_t bc = (b * channels + c);
