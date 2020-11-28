@@ -3,7 +3,10 @@
 
 #include <immintrin.h>
 
+#include "asm_wino.h"
 #include "types/types.h"
+
+#define ASM 1
 
 template <typename T>
 void compute(const T* transformed_filter_data, const T* transform_in,
@@ -27,6 +30,7 @@ void compute(const T* transformed_filter_data, const T* transform_in,
         const index_t c_stride = tile_count * out_channels;
         T* c_ptr = transform_out + m * tile_count + tile + tidx * c_stride;
 
+#ifndef ASM
         __m512 c0 = _mm512_setzero_ps();
         __m512 c1 = _mm512_setzero_ps();
         __m512 c2 = _mm512_setzero_ps();
@@ -84,6 +88,10 @@ void compute(const T* transformed_filter_data, const T* transform_in,
         _mm512_mask_storeu_ps(c_ptr + 5 * c_stride, mask, c5);
         _mm512_mask_storeu_ps(c_ptr + 6 * c_stride, mask, c6);
         _mm512_mask_storeu_ps(c_ptr + 7 * c_stride, mask, c7);
+#else
+        asm_wino_multiply(a_stride, b_stride, c_stride, tile_count, in_channels,
+                          mask, a_ptr, b_ptr, c_ptr);
+#endif
       }
     }
   }
