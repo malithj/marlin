@@ -21,7 +21,7 @@ void initialize_tensor(std::shared_ptr<Tensor<T>> tensor) {
       for (index_t i = 0; i < dim2; ++i) {
         for (index_t j = 0; j < dim3; ++j) {
           index_t idx = dim0_offset * b + dim1_offset * m + i * dim3 + j;
-          data[idx] = idx;  // (static_cast<T>(rand()) / RAND_MAX) / 100;
+          data[idx] = (static_cast<T>(rand()) / RAND_MAX);
         }
       }
     }
