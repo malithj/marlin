@@ -14,6 +14,8 @@
 #include "wino_interface.h"
 #include "wino_multiply.h"
 
+using namespace MARLIN;
+
 template <typename T, wino_k_t W, wino_o_t O>
 class Winograd : public IWinograd<T, W, O> {
  private:
@@ -21,9 +23,16 @@ class Winograd : public IWinograd<T, W, O> {
 
  public:
   Winograd();
-  void run(const std::shared_ptr<Tensor<float>> input,
-           const std::shared_ptr<Tensor<float>> filter,
-           std::shared_ptr<Tensor<float>> output);
+#ifdef ENABLE_JIT
+  void run(const std::shared_ptr<Tensor<T>> input,
+           const std::shared_ptr<Tensor<T>> filter,
+           std::shared_ptr<Tensor<T>> output,
+           std::shared_ptr<WinoJitter<T>> jitter);
+#else
+  void run(const std::shared_ptr<Tensor<T>> input,
+           const std::shared_ptr<Tensor<T>> filter,
+           std::shared_ptr<Tensor<T>> output);
+#endif
   void transform_input(const T* input, const index_t batch,
                        const index_t in_height, const index_t in_width,
                        const index_t in_channels, const index_t tile_count,
@@ -89,9 +98,17 @@ void Winograd<T, W, O>::transform_output(const T* input, const index_t batch,
 }
 
 template <typename T, wino_k_t W, wino_o_t O>
-void Winograd<T, W, O>::run(const std::shared_ptr<Tensor<float>> input,
-                            const std::shared_ptr<Tensor<float>> filter,
-                            std::shared_ptr<Tensor<float>> output) {
+#ifdef ENABLE_JIT
+void Winograd<T, W, O>::run(const std::shared_ptr<Tensor<T>> input,
+                            const std::shared_ptr<Tensor<T>> filter,
+                            std::shared_ptr<Tensor<T>> output,
+                            std::shared_ptr<WinoJitter<T>> jitter) {
+#else
+void Winograd<T, W, O>::run(const std::shared_ptr<Tensor<T>> input,
+                            const std::shared_ptr<Tensor<T>> filter,
+                            std::shared_ptr<Tensor<T>> output) {
+
+#endif
   const index_t batch = input->dim(0);
   const index_t in_channels = input->dim(1);
   const index_t in_height = input->dim(2);
@@ -171,6 +188,7 @@ void Winograd<T, W, O>::run(const std::shared_ptr<Tensor<float>> input,
   T* transformed_in_data = pad_out_data + padded_out_size;
   T* transformed_out_data = transformed_in_data + transformed_in_size;
 
+#ifndef ENABLE_JIT
   std::shared_ptr<Tensor<T>> transformed_filter = std::make_shared<Tensor<T>>();
   transformed_filter->resize({out_channels, in_channels, in_tile_area});
   T* transformed_filter_data = transformed_filter->mutable_data();
@@ -178,6 +196,7 @@ void Winograd<T, W, O>::run(const std::shared_ptr<Tensor<float>> input,
 
   this->transform_kernel(filter_data, out_channels, in_channels,
                          transformed_filter_data);
+#endif
 
   this->transform_input(pad_data, batch, padded_in_height, padded_in_width,
                         in_channels, tile_count, transformed_in_data);
@@ -191,8 +210,14 @@ void Winograd<T, W, O>::run(const std::shared_ptr<Tensor<float>> input,
   for (index_t b = 0; b < batch; ++b) {
     T* transform_in = transformed_in_data + b * transform_in_size_per_batch;
     T* transform_out = transformed_out_data + b * transform_out_size_per_batch;
+#ifndef ENABLE_JIT
     compute(transformed_filter_data, transform_in, in_tile_area, out_channels,
             tile_count, in_channels, transform_out);
+#else
+    compute(transform_in, in_tile_area, out_channels, tile_count, in_channels,
+            transform_out, jitter);
+
+#endif
   }
   transform_output(transformed_out_data, batch, padded_out_height,
                    padded_out_width, out_channels, tile_count, pad_out_data);

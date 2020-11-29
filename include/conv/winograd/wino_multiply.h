@@ -4,15 +4,35 @@
 #include <immintrin.h>
 
 #include "asm_wino.h"
+#include "jit/wino_jitter.h"
 #include "types/types.h"
 
-#define ASM 1
-
+namespace MARLIN {
+// Performs Winograd elementwise multiplication
+// The following variables are used to define the functionality
+//
+// parameters
+// ----------
+// transformed filter data - transformed winograd filter
+// transform in            - transformed winograd input
+// in tile area            - input tile area after transformation
+// out channels            - number of filters
+// tile count              - numer of tiles in input image
+// in channels             - number of input channels
+// transform out           - transformed winograd output
 template <typename T>
+#ifdef ENABLE_JIT
+void compute(const T* transform_in, const index_t in_tile_area,
+             const index_t out_channels, const index_t tile_count,
+             const index_t in_channels, T* transform_out,
+             std::shared_ptr<WinoJitter<T>> jitter) {
+#else
 void compute(const T* transformed_filter_data, const T* transform_in,
              const index_t in_tile_area, const index_t out_channels,
              const index_t tile_count, const index_t in_channels,
              T* transform_out) {
+
+#endif
   for (index_t m = 0; m < out_channels; ++m) {
     for (index_t tile = 0; tile < tile_count; tile += 16) {
       const uint16_t mask =
@@ -23,14 +43,14 @@ void compute(const T* transformed_filter_data, const T* transform_in,
             transform_in + tile + (tidx * tile_count) * in_channels;
         const index_t a_stride = tile_count * in_channels;
 
+        const index_t c_stride = tile_count * out_channels;
+        T* c_ptr = transform_out + m * tile_count + tile + tidx * c_stride;
+
+#ifndef ENABLE_JIT
         const index_t b_stride = in_channels * out_channels;
         const T* b_ptr =
             transformed_filter_data + tidx * b_stride + m * in_channels;
 
-        const index_t c_stride = tile_count * out_channels;
-        T* c_ptr = transform_out + m * tile_count + tile + tidx * c_stride;
-
-#ifndef ASM
         __m512 c0 = _mm512_setzero_ps();
         __m512 c1 = _mm512_setzero_ps();
         __m512 c2 = _mm512_setzero_ps();
@@ -89,11 +109,15 @@ void compute(const T* transformed_filter_data, const T* transform_in,
         _mm512_mask_storeu_ps(c_ptr + 6 * c_stride, mask, c6);
         _mm512_mask_storeu_ps(c_ptr + 7 * c_stride, mask, c7);
 #else
-        asm_wino_multiply(a_stride, b_stride, c_stride, tile_count, in_channels,
-                          mask, a_ptr, b_ptr, c_ptr);
+        const index_t idx =
+            (in_tile_area / 8) * in_channels * m + (tidx / 8) * in_channels;
+        asm_wino_multiply(a_stride, c_stride, tile_count, in_channels, mask,
+                          a_ptr, c_ptr, jitter->get_p_addr(),
+                          jitter->get_offset_data(), idx);
 #endif
       }
     }
   }
 }
+}  // namespace MARLIN
 #endif
