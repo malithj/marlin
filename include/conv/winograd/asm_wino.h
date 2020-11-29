@@ -1,5 +1,5 @@
-#ifndef __ASM_KERNELS_H_
-#define __ASM_KERNELS_H_
+#ifndef __ASM_WINO_KERNELS_H_
+#define __ASM_WINO_KERNELS_H_
 
 #include "types/types.h"
 
