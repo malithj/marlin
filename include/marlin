@@ -2,6 +2,9 @@
 #define __MARLIN_H__
 
 #include "conv/winograd/wino_impl.h"
+#include "gemm/gemm_f32.h"
+#include "jit/jitter.h"
+#include "jit/wino_jitter.h"
 #include "mem/memory.h"
 #include "tensor/tensor.h"
 
