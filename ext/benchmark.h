@@ -8,11 +8,10 @@
 #include <Eigen/Dense>
 #include <chrono>
 #include <fstream>
+#include <marlin>
 
-#include "gemm/gemm_f32.h"
 #include "gtest/gtest.h"
-#include "jit/jitter.h"
-#include "mem/memory.h"
+
 using namespace testing;
 using namespace Eigen;
 
@@ -54,4 +53,28 @@ float sparsity_adjustment(const float sparsity) {
   }
 }
 
+/* initialize tensor */
+template <typename T>
+void initialize_tensor(std::shared_ptr<Tensor<T>> tensor) {
+  index_t dim0 = tensor->dim(0);
+  index_t dim1 = tensor->dim(1);
+  index_t dim2 = tensor->dim(2);
+  index_t dim3 = tensor->dim(3);
+
+  T *data = tensor->mutable_data();
+
+  index_t dim1_offset = dim2 * dim3;
+  index_t dim0_offset = dim1 * dim1_offset;
+
+  for (index_t b = 0; b < dim0; ++b) {
+    for (index_t m = 0; m < dim1; ++m) {
+      for (index_t i = 0; i < dim2; ++i) {
+        for (index_t j = 0; j < dim3; ++j) {
+          index_t idx = dim0_offset * b + dim1_offset * m + i * dim3 + j;
+          data[idx] = (static_cast<T>(rand()) / RAND_MAX);
+        }
+      }
+    }
+  }
+}
 #endif
