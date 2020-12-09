@@ -475,11 +475,15 @@ TEST(Benchmark, WinogradJIT) {
   std::vector<index_t> vin_channels = {3, 4, 8, 16, 32, 64, 128, 256, 512};
   std::vector<index_t> vout_channels = {1, 3, 4, 8, 16, 32, 64, 128, 256, 512};
 
-  const index_t iterations = 100;
-  const index_t im_height = 224;
-  const index_t im_width = 224;
+  const index_t iterations = 1000;
+  const index_t im_height = 32;
+  const index_t im_width = 32;
 
+#ifdef ENABLE_JIT
   const index_t width = 5;
+#else
+  const index_t width = 7;
+#endif
   const index_t height =
       vbatches.size() * vin_channels.size() * vout_channels.size() * iterations;
   double *results =
@@ -548,12 +552,31 @@ TEST(Benchmark, WinogradJIT) {
 #ifdef ENABLE_JIT
           winograd.run(input, filter, output, jitter);
 #else
+          winograd.set_switch(LIBMARLIN);
           winograd.run(input, filter, output);
 #endif
           end = std::chrono::steady_clock::now();
           duration = std::chrono::duration_cast<std::chrono::microseconds>(
               end - begin);
           results[idx++] += duration.count();
+#ifndef ENABLE_JIT
+          begin = std::chrono::steady_clock::now();
+          winograd.set_switch(LIBMKL);
+          winograd.run(input, filter, output);
+          end = std::chrono::steady_clock::now();
+          duration = std::chrono::duration_cast<std::chrono::microseconds>(
+              end - begin);
+          results[idx++] += duration.count();
+
+          begin = std::chrono::steady_clock::now();
+          winograd.set_switch(LIBONEDNN);
+          winograd.run(input, filter, output);
+          end = std::chrono::steady_clock::now();
+          duration = std::chrono::duration_cast<std::chrono::microseconds>(
+              end - begin);
+          results[idx++] += duration.count();
+
+#endif
         }
       }
     }
@@ -567,12 +590,13 @@ TEST(Benchmark, WinogradJIT) {
   std::string s_ = stream.str();
   std::string filename;
 #ifdef ENABLE_JIT
+  std::string header = "IDX,BATCH,IN_CHANNELS,OUT_CHANNELS,ITERATION,WINOGRAD";
   filename = "build/results/jit_" + s_ + ".csv";
 #else
+  std::string header =
+      "IDX,BATCH,IN_CHANNELS,OUT_CHANNELS,ITERATION,WINOGRAD,MKL,ONEDNN";
   filename = "build/results/" + s_ + ".csv";
 #endif
-  std::string header =
-      "IDX,BATCH,IN_CHANNELS,OUT_CHANNELS,ITERATION,WIN_3x3_2x2";
   tofile(filename, results, height, width, header);
   free(results);
 }
