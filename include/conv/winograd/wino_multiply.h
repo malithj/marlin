@@ -33,6 +33,7 @@ void compute(const T* transformed_filter_data, const T* transform_in,
              T* transform_out) {
 
 #endif
+#pragma omp parallel for collapse(1)
   for (index_t m = 0; m < out_channels; ++m) {
     for (index_t tile = 0; tile < tile_count; tile += 16) {
       const uint16_t mask =
