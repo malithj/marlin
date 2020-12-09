@@ -6,6 +6,7 @@ TEST_FLAGS				= -Wall -march=skylake-avx512 -DENABLE_JIT -O2 -fPIC -fprefetch-lo
 CFLAGS					= -fPIC -g $(TEST_FLAGS)
 LIB_FLAGS				= -fPIC -g $(TEST_FLAGS)
 PERF_TARGET				= perf_marlin
+WIN_PERF_TARGET			= win_perf_marlin
 TARGET					= libmarlin
 TEST_TARGET				= test
 XSMM_TARGET				= xsmm
@@ -42,7 +43,7 @@ TEST_DIRS = $(sort $(dir $(wildcard test/*/*)))
 SRC_DIRS = $(sort $(dir $(wildcard src/*/*/*)))
 PREFIXED_T = $(patsubst %,$(ODIR)/%,$(TEST_DIRS))
 PREFIXED_S = $(patsubst %,$(ODIR)/%,$(SRC_DIRS))
-MODULES = $(ODIR)/test $(PREFIXED_S) $(PREFIXED_T) $(ODIR)/ext $(ODIR)/perf $(BUILD_DIR)/$(GOOGLE_TEST) $(BUILD_DIR)/$(RESULT_DIR)
+MODULES = $(ODIR)/test $(PREFIXED_S) $(PREFIXED_T) $(ODIR)/ext $(ODIR)/perf $(ODIR)/win_perf $(BUILD_DIR)/$(GOOGLE_TEST) $(BUILD_DIR)/$(RESULT_DIR)
 OBJ  = $(TARGET).o
 ASM_OBJ = $(wildcard src/asm/asm*.s) $(wildcard src/asm/kernels/*.s)
 TEST_OBJ = $(wildcard test/*.cc) $(wildcard test/*/*.cc)
@@ -62,6 +63,7 @@ ASM_OBJ_WITH_PATH = $(patsubst %.s,$(ODIR)/%.o,$(ASM_OBJ))
 TEST_OBJ_WITH_PATH = $(patsubst %.cc,$(ODIR)/%.o,$(TEST_OBJ))
 EXT_OBJ_WITH_PATH = $(patsubst %,$(ODIR)/ext/%,$(EXT_OBJ))
 PERF_OBJ_WITH_PATH = $(patsubst %,$(ODIR)/perf/%,$(PERF_OBJ))
+WIN_PERF_OBJ_WITH_PATH = $(patsubst %,$(ODIR)/win_perf/%,$(PERF_OBJ))
 
 all: $(OUT_DIR) $(GOOGLE_TEST) $(TARGET)
 	@echo -n "${CMD_COLOR}"
@@ -106,6 +108,12 @@ $(EXT_TARGET): $(ASM_OBJ_WITH_PATH) $(EXT_OBJ_WITH_PATH)
 	@echo "${RESET_COLOR}"
 
 $(PERF_TARGET): $(ASM_OBJ_WITH_PATH) $(PERF_OBJ_WITH_PATH)
+	@echo "${LINE_COLOR}building executable: $@${RESET_COLOR}"
+	@echo -n "${CMD_COLOR}"
+	$(CC) -o $(BUILD_DIR)/$@ $^ $(CFLAGS) $(LIBS) $(EXT_LIBS)
+	@echo "${RESET_COLOR}"
+
+$(WIN_PERF_TARGET): $(ASM_OBJ_WITH_PATH) $(WIN_PERF_OBJ_WITH_PATH)
 	@echo "${LINE_COLOR}building executable: $@${RESET_COLOR}"
 	@echo -n "${CMD_COLOR}"
 	$(CC) -o $(BUILD_DIR)/$@ $^ $(CFLAGS) $(LIBS) $(EXT_LIBS)
