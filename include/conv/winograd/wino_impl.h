@@ -5,6 +5,7 @@
 #include <stdio.h>
 
 #include "gemm/gemm.h"
+#include "gemm/gemm_winograd.h"
 #include "mem/allocator.h"
 #include "mem/buffer.h"
 #include "tensor/tensor.h"
@@ -20,9 +21,11 @@ template <typename T, wino_k_t W, wino_o_t O>
 class Winograd : public IWinograd<T, W, O> {
  private:
   std::shared_ptr<Buffer<T>> scratch;
+  std::unique_ptr<GEMMWinograd<T>> gemm;
+  gemm_library lib_switch;
 
  public:
-  Winograd();
+  Winograd(gemm_library lib = LIBMARLIN);
 #ifdef ENABLE_JIT
   void run(const std::shared_ptr<Tensor<T>> input,
            const std::shared_ptr<Tensor<T>> filter,
@@ -32,6 +35,10 @@ class Winograd : public IWinograd<T, W, O> {
   void run(const std::shared_ptr<Tensor<T>> input,
            const std::shared_ptr<Tensor<T>> filter,
            std::shared_ptr<Tensor<T>> output);
+  void set_switch(gemm_library lib_switch) {
+    this->lib_switch = lib_switch;
+    this->gemm->set_switch(lib_switch);
+  }
 #endif
   void transform_input(const T* input, const index_t batch,
                        const index_t in_height, const index_t in_width,
@@ -58,9 +65,10 @@ class Winograd : public IWinograd<T, W, O> {
 };
 
 template <typename T, wino_k_t W, wino_o_t O>
-Winograd<T, W, O>::Winograd() {
+Winograd<T, W, O>::Winograd(gemm_library lib) {
   this->scratch = std::make_shared<Buffer<T>>(GetCPUAllocator<T>());
-  //   this->gemm = std::make_unique<GEMM<T>>();
+  this->gemm = std::make_unique<GEMMWinograd<T>>();
+  this->lib_switch = lib;
 }
 
 template <typename T, wino_k_t W, wino_o_t O>
@@ -211,8 +219,13 @@ void Winograd<T, W, O>::run(const std::shared_ptr<Tensor<T>> input,
     T* transform_in = transformed_in_data + b * transform_in_size_per_batch;
     T* transform_out = transformed_out_data + b * transform_out_size_per_batch;
 #ifndef ENABLE_JIT
-    compute(transformed_filter_data, transform_in, in_tile_area, out_channels,
-            tile_count, in_channels, transform_out);
+    if (lib_switch == LIBMARLIN) {
+      compute(transformed_filter_data, transform_in, in_tile_area, out_channels,
+              tile_count, in_channels, transform_out);
+    } else {
+      gemm->compute(transformed_filter_data, transform_in, in_tile_area,
+                    out_channels, tile_count, in_channels, transform_out);
+    }
 #else
     compute(transform_in, in_tile_area, out_channels, tile_count, in_channels,
             transform_out, jitter);
