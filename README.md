@@ -2,6 +2,10 @@
 
 [![License](https://img.shields.io/badge/license-BSD3-blue.svg "BSD 3-Clause License")](LICENSE.md)
 
+<div align="center">
+  <img src="docs/marlin.png" width="150" alt="MARLIN"/>
+</div>
+
 MARLIN is a library with JIT (Just-in-time) compilation support to optimize performance of small and medium matrix multiplication as well as convolutions. Currently, <span>Intel&#160;AVX&#8209;512</span> is supported. Compared to existing JIT GEMM libraries, MARLIN aims at converting data accesses to instruction accesses by embedding single precision floats within instructions as immediates. More details about the architecture of MARLIN is available in our paper published in CGO SRC 2021 (International Symposium on Code Generation and Optimization).
 
 
