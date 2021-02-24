@@ -47,3 +47,27 @@ int main(/*int argc, char* argv[]*/) {
   sgemm('N', 'N', m, n, k, 1.0, A, k, B, n, 0, C, n, jitter);
 }
 ```
+
+## Build Instructions
+
+The unit tests depend on Google test framework and is required to build the library. The code for Google test can be updated through a git submodule update.
+
+```bash
+git submodule init
+git submodule update
+```
+
+After the code is available, run the make command to build the library. The binary `libmarlin.so` will be created in the `build` directory. 
+
+```bash
+make
+```
+
+To verify whether everything's working as expected, build and run the unit tests using the following commands.
+
+```bash
+make test
+./build/test
+```
+
+## External Benchmarks
