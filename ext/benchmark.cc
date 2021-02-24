@@ -472,8 +472,10 @@ TEST(Benchmark, JitterOverhead) {
 
 TEST(Benchmark, WinogradJIT) {
   std::vector<index_t> vbatches = {1};
-  std::vector<index_t> vin_channels = {3, 4, 8, 16, 32, 64, 128, 256, 512};
-  std::vector<index_t> vout_channels = {1, 3, 4, 8, 16, 32, 64, 128, 256, 512};
+  std::vector<index_t> vin_channels = {3};
+  //{3, 4, 8, 16, 32, 64, 128, 256, 512};
+  std::vector<index_t> vout_channels = {
+      1};  //{1,  3,   4,   8,   16,  32,64, 128, 256, 512, 1024};
 
   const index_t iterations = 1000;
   const index_t im_height = 32;
@@ -482,7 +484,7 @@ TEST(Benchmark, WinogradJIT) {
 #ifdef ENABLE_JIT
   const index_t width = 5;
 #else
-  const index_t width = 7;
+  const index_t width = 8;
 #endif
   const index_t height =
       vbatches.size() * vin_channels.size() * vout_channels.size() * iterations;
@@ -569,6 +571,14 @@ TEST(Benchmark, WinogradJIT) {
           results[idx++] += duration.count();
 
           begin = std::chrono::steady_clock::now();
+          winograd.set_switch(JITMKL);
+          winograd.run(input, filter, output);
+          end = std::chrono::steady_clock::now();
+          duration = std::chrono::duration_cast<std::chrono::microseconds>(
+              end - begin);
+          results[idx++] += duration.count();
+
+          begin = std::chrono::steady_clock::now();
           winograd.set_switch(LIBONEDNN);
           winograd.run(input, filter, output);
           end = std::chrono::steady_clock::now();
@@ -594,7 +604,8 @@ TEST(Benchmark, WinogradJIT) {
   filename = "build/results/jit_" + s_ + ".csv";
 #else
   std::string header =
-      "IDX,BATCH,IN_CHANNELS,OUT_CHANNELS,ITERATION,WINOGRAD,MKL,ONEDNN";
+      "IDX,BATCH,IN_CHANNELS,OUT_CHANNELS,ITERATION,WINOGRAD,MKL,JITMKL"
+      ",ONEDNN";
   filename = "build/results/" + s_ + ".csv";
 #endif
   tofile(filename, results, height, width, header);

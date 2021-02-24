@@ -215,6 +215,12 @@ void Winograd<T, W, O>::run(const std::shared_ptr<Tensor<T>> input,
   const index_t transform_out_size_per_batch =
       in_tile_area * out_channels * tile_count;
 
+#ifndef ENABLE_JIT
+  if (lib_switch == JITMKL) {
+    this->gemm->init_jit_library(out_channels, tile_count, in_channels);
+  }
+#endif
+
   for (index_t b = 0; b < batch; ++b) {
     T* transform_in = transformed_in_data + b * transform_in_size_per_batch;
     T* transform_out = transformed_out_data + b * transform_out_size_per_batch;
