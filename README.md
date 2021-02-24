@@ -1,6 +1,6 @@
 # MARLIN
 
-[![License](https://img.shields.io/badge/license-BSD3-blue.svg "BSD 3-Clause License")](LICENSE.md)! [[Build status](https://github.com/malithj/marlin/actions/workflows/c-cpp.yml/badge.svg)]
+[![License](https://img.shields.io/badge/license-BSD3-blue.svg "BSD 3-Clause License")](LICENSE.md)! ![Build status](https://github.com/malithj/marlin/actions/workflows/c-cpp.yml/badge.svg)
 
 <div align="center">
   <img src="docs/marlin.png" width="150" alt="MARLIN"/>
