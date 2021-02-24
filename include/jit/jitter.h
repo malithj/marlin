@@ -13,7 +13,7 @@
 //
 template <typename T>
 class Jitter {
- private:
+ protected:
   std::shared_ptr<IAllocator<unsigned char>> code_alloc;
   std::shared_ptr<IAllocator<index_t>> off_alloc;
   std::shared_ptr<IBuffer<unsigned char>> code_buffer;

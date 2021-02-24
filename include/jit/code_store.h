@@ -26,6 +26,8 @@ template <typename T>
 class CodeStore {
  private:
   std::unique_ptr<Logger> logger;
+
+ protected:
   std::unique_ptr<std::vector<unsigned char>> sub_codelet_broadcast_b;
   std::unique_ptr<std::vector<unsigned char>> sub_codelet_broadcast_bz;
   // fast execute method uses codelet positions

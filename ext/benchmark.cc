@@ -469,3 +469,145 @@ TEST(Benchmark, JitterOverhead) {
   perf_bench(1, 51, 1, 4, 32, 4, 4, 0, 1);
   perf_bench(1, 51, 1, 4, 32, 4, 10, 0, 1);
 }
+
+TEST(Benchmark, WinogradJIT) {
+  std::vector<index_t> vbatches = {1};
+  std::vector<index_t> vin_channels = {3};
+  //{3, 4, 8, 16, 32, 64, 128, 256, 512};
+  std::vector<index_t> vout_channels = {
+      1};  //{1,  3,   4,   8,   16,  32,64, 128, 256, 512, 1024};
+
+  const index_t iterations = 1000;
+  const index_t im_height = 32;
+  const index_t im_width = 32;
+
+#ifdef ENABLE_JIT
+  const index_t width = 5;
+#else
+  const index_t width = 8;
+#endif
+  const index_t height =
+      vbatches.size() * vin_channels.size() * vout_channels.size() * iterations;
+  double *results =
+      static_cast<double *>(malloc(height * width * sizeof(double)));
+  memset(results, 0, sizeof(double) * height * width);
+
+  std::chrono::steady_clock::time_point begin;
+  std::chrono::steady_clock::time_point end;
+  std::chrono::microseconds duration;
+  std::shared_ptr<Tensor<float>> input;
+  std::shared_ptr<Tensor<float>> filter;
+  std::shared_ptr<Tensor<float>> output;
+
+  Winograd<float, WINO_K_3x3, WINO_O_2x2> winograd;
+
+  for (index_t b = 0; b < vbatches.size(); ++b) {
+    for (index_t ch = 0; ch < vin_channels.size(); ++ch) {
+      for (index_t f = 0; f < vout_channels.size(); ++f) {
+        const index_t batch = vbatches[b];
+        const index_t in_channels = vin_channels[ch];
+        const index_t out_channels = vout_channels[f];
+        const index_t b_offset = b * vin_channels.size() + ch;
+        const index_t ch_offset = b_offset * vout_channels.size() + f;
+
+        input = std::make_shared<Tensor<float>>();
+        filter = std::make_shared<Tensor<float>>(true);
+        output = std::make_shared<Tensor<float>>();
+
+        input->resize({batch, in_channels, im_height, im_width});
+        filter->resize({out_channels, in_channels, 3, 3});
+        initialize_tensor(input);
+        initialize_tensor(filter);
+
+#ifdef ENABLE_JIT
+        const index_t in_tile_area = 16;
+        std::shared_ptr<Tensor<float>> transformed_filter =
+            std::make_shared<Tensor<float>>();
+        transformed_filter->resize({out_channels, in_channels, in_tile_area});
+        float *transformed_filter_data = transformed_filter->mutable_data();
+        const float *filter_data = filter->data();
+
+        begin = std::chrono::steady_clock::now();
+        winograd.transform_kernel(filter_data, out_channels, in_channels,
+                                  transformed_filter_data);
+
+        std::shared_ptr<WinoJitter<float>> jitter =
+            std::make_shared<WinoJitter<float>>();
+        jitter->generate_code(transformed_filter_data, in_tile_area,
+                              in_channels, out_channels);
+        end = std::chrono::steady_clock::now();
+        duration =
+            std::chrono::duration_cast<std::chrono::microseconds>(end - begin);
+        const double overhead = duration.count();
+        results[ch_offset * iterations * width] += overhead;
+#endif
+        for (index_t i = 0; i < iterations; ++i) {
+          const index_t f_offset = ch_offset * iterations + i;
+          index_t idx = f_offset * width;
+
+          results[idx++] = batch;
+          results[idx++] = in_channels;
+          results[idx++] = out_channels;
+          results[idx++] = i;
+
+          begin = std::chrono::steady_clock::now();
+#ifdef ENABLE_JIT
+          winograd.run(input, filter, output, jitter);
+#else
+          winograd.set_switch(LIBMARLIN);
+          winograd.run(input, filter, output);
+#endif
+          end = std::chrono::steady_clock::now();
+          duration = std::chrono::duration_cast<std::chrono::microseconds>(
+              end - begin);
+          results[idx++] += duration.count();
+#ifndef ENABLE_JIT
+          begin = std::chrono::steady_clock::now();
+          winograd.set_switch(LIBMKL);
+          winograd.run(input, filter, output);
+          end = std::chrono::steady_clock::now();
+          duration = std::chrono::duration_cast<std::chrono::microseconds>(
+              end - begin);
+          results[idx++] += duration.count();
+
+          begin = std::chrono::steady_clock::now();
+          winograd.set_switch(JITMKL);
+          winograd.run(input, filter, output);
+          end = std::chrono::steady_clock::now();
+          duration = std::chrono::duration_cast<std::chrono::microseconds>(
+              end - begin);
+          results[idx++] += duration.count();
+
+          begin = std::chrono::steady_clock::now();
+          winograd.set_switch(LIBONEDNN);
+          winograd.run(input, filter, output);
+          end = std::chrono::steady_clock::now();
+          duration = std::chrono::duration_cast<std::chrono::microseconds>(
+              end - begin);
+          results[idx++] += duration.count();
+
+#endif
+        }
+      }
+    }
+  }
+  std::stringstream stream;
+  stream << "winograd"
+         << "_"
+         << std::chrono::duration_cast<std::chrono::seconds>(
+                std::chrono::system_clock::now().time_since_epoch())
+                .count();
+  std::string s_ = stream.str();
+  std::string filename;
+#ifdef ENABLE_JIT
+  std::string header = "IDX,BATCH,IN_CHANNELS,OUT_CHANNELS,ITERATION,WINOGRAD";
+  filename = "build/results/jit_" + s_ + ".csv";
+#else
+  std::string header =
+      "IDX,BATCH,IN_CHANNELS,OUT_CHANNELS,ITERATION,WINOGRAD,MKL,JITMKL"
+      ",ONEDNN";
+  filename = "build/results/" + s_ + ".csv";
+#endif
+  tofile(filename, results, height, width, header);
+  free(results);
+}

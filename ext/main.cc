@@ -3,8 +3,8 @@
 
 #include <memory>
 
-#include "../../include/log/logging.h"
 #include "gtest/gtest.h"
+#include "log/logging.h"
 
 int main(int argc, char *argv[]) {
   std::unique_ptr<Logging::LoggingInternals::Logger> logger(
