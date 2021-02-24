@@ -1,42 +1,42 @@
-CC						= g++
-CFLAGS					= -march=skylake-avx512
-EXT_TARGET				= ext
-EXT_FLAGS				= -Wall -march=skylake-avx512 -DENABLE_JIT -O2 -fPIC -fprefetch-loop-arrays -falign-functions=16 -falign-loops=16 -flto -fuse-linker-plugin -funroll-loops -Wl,--gc-sections -fdata-sections -ffunction-sections -fvisibility=hidden -fopenmp
-TEST_FLAGS				= -Wall -march=skylake-avx512 -DENABLE_JIT -O2 -fPIC -fprefetch-loop-arrays -falign-functions=16 -falign-loops=16 -flto -fuse-linker-plugin -funroll-loops -Wl,--gc-sections -fdata-sections -ffunction-sections -fvisibility=hidden -fopenmp
-CFLAGS					= -fPIC -g $(TEST_FLAGS)
-LIB_FLAGS				= -fPIC -g $(TEST_FLAGS)
-PERF_TARGET				= perf_marlin
-WIN_PERF_TARGET			= win_perf_marlin
-TARGET					= libmarlin
-TEST_TARGET				= test
-XSMM_TARGET				= xsmm
-BUILD_DIR				= build
-SRC_DIR					= src
-TEST_DIR				= test
-IDIR					= include
-INCLUDE_DIR				= include
-MKDIR_P					= mkdir -p
-GOOGLE_TEST				= googletest
-RESULT_DIR				= results
-EIGEN_INC_DIR			= ${EIGEN_INC}
-LIBXSMM_LIB_DIR			= ${LIBXSMM_LIB}
-LIBXSMM_INC_DIR			= ${LIBXSMM_INC}
-MKL_LIB_DIR				= ${MKL_LIB}
-MKL_INC_DIR				= ${MKL_INC}
-OPENBLAS_INC_DIR		= ${OPENBLAS_INC}
-OPENBLAS_CFG_INC_DIR	= ${OPENBLAS_CFG_INC}
-OPENBLAS_LIB_DIR		= ${OPENBLAS_LIB}
-ONEDNN_CFG_INC_DIR		= ${ONEDNN_LIB}/../include
-ONEDNN_LIB_DIR			= ${ONEDNN_LIB}
-ONEDNN_INC_DIR			= ${ONEDNN_INC}
-ODIR					= $(BUILD_DIR)/bin
-OUT_DIR					= $(ODIR)
-VTUNE_LIB_DIR			= ${VTUNE_LIB}
-VTUNE_INC_DIR			= ${VTUNE_INC}
-LINE_COLOR				= \033[0;33m
-CMD_COLOR				= \033[1;32m
-RESET_COLOR				= \033[0m
-DANGER_COLOR			= \033[1;91m
+CC              = g++
+CFLAGS          = -march=skylake-avx512
+EXT_TARGET      = ext
+EXT_FLAGS       = Wall -march=skylake-avx512 -DENABLE_JIT -O2 -fPIC -fprefetch-loop-arrays -falign-functions=16 -falign-loops=16 -flto -fuse-linker-plugin -funroll-loops -Wl,--gc-sections -fdata-sections -ffunction-sections -fvisibility=hidden -fopenmp
+TEST_FLAGS      = -Wall -march=skylake-avx512 -DENABLE_JIT -O2 -fPIC -fprefetch-loop-arrays -falign-functions=16 -falign-loops=16 -flto -fuse-linker-plugin -funroll-loops -Wl,--gc-sections -fdata-sections -ffunction-sections -fvisibility=hidden -fopenmp
+CFLAGS          = -fPIC -g $(TEST_FLAGS)
+LIB_FLAGS       = -fPIC -g $(TEST_FLAGS)
+PERF_TARGET	    = perf_marlin
+WIN_PERF_TARGET	= win_perf_marlin
+TARGET          = libmarlin
+TEST_TARGET	    = test
+XSMM_TARGET     = xsmm
+BUILD_DIR       = build
+SRC_DIR	        = src
+TEST_DIR        = test
+IDIR            = include
+INCLUDE_DIR     = include
+MKDIR_P         = mkdir -p
+GOOGLE_TEST     = googletest
+RESULT_DIR      = results
+EIGEN_INC_DIR   = ${EIGEN_INC}
+LIBXSMM_LIB_DIR	= ${LIBXSMM_LIB}
+LIBXSMM_INC_DIR	= ${LIBXSMM_INC}
+MKL_LIB_DIR     = ${MKL_LIB}
+MKL_INC_DIR     = ${MKL_INC}
+OPENBLAS_INC_DIR= ${OPENBLAS_INC}
+OPENBLAS_CFG_INC_DIR = ${OPENBLAS_CFG_INC}
+OPENBLAS_LIB_DIR     = ${OPENBLAS_LIB}
+ONEDNN_CFG_INC_DIR   = ${ONEDNN_LIB}/../include
+ONEDNN_LIB_DIR       = ${ONEDNN_LIB}
+ONEDNN_INC_DIR       = ${ONEDNN_INC}
+ODIR                 = $(BUILD_DIR)/bin
+OUT_DIR              = $(ODIR)
+VTUNE_LIB_DIR	       = ${VTUNE_LIB}
+VTUNE_INC_DIR	       = ${VTUNE_INC}
+LINE_COLOR           = \033[0;33m
+CMD_COLOR	           = \033[1;32m
+RESET_COLOR          = \033[0m
+DANGER_COLOR         = \033[1;91m
 
 
 TEST_DIRS = $(sort $(dir $(wildcard test/*/*)))
