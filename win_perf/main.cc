@@ -26,9 +26,11 @@ int main(int argc, char *argv[]) {
 #ifdef ENABLE_JIT
     printf("  0\tMARLIN\n");
 #else
-    printf("  0\tOneDNN\n");
+    printf("  0\tMARLIN\n");
     printf("  1\tIntel MKL\n");
-    printf("  2\tAVX-512\n");
+    printf("  2\tONEDNN\n");
+    printf("  3\tJIT MKL\n");
+    printf("  4\tJIT LIBXSMM\n");
 #endif
     printf("\nThe arguments list:\n");
     printf("  B\tnumber of batches\n");
@@ -119,6 +121,7 @@ int main(int argc, char *argv[]) {
     }
   } else {
     printf("WARN: exiting perf without profiled execution!\n");
+    return 0;
   }
 #else
   if (mode == 0) {
@@ -136,7 +139,16 @@ int main(int argc, char *argv[]) {
     for (index_t i = 0; i < iterations; ++i) {
       winograd.run(input, filter, output);
     }
-
+  } else if (mode == 3) {
+    winograd.set_switch(JITMKL);
+    for (index_t i = 0; i < iterations; ++i) {
+      winograd.run(input, filter, output);
+    }
+  } else if (mode == 4) {
+    winograd.set_switch(JITLIBXSMM);
+    for (index_t i = 0; i < iterations; ++i) {
+      winograd.run(input, filter, output);
+    }
   } else {
     printf("WARN: exiting perf without profiled execution!\n");
   }

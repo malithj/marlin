@@ -91,7 +91,8 @@ def iterate_over_matrix_sizes(mat_m_start: np.int64, mat_m_end: np.int64,
     num_m_mat = np.int64((mat_m_end - mat_m_start) / mat_m_inc)
     num_n_mat = np.int64((mat_n_end - mat_n_start) / mat_n_inc)
     num_k_mat = np.int64((mat_k_end - mat_k_start) / mat_k_inc)
-    num_modes = 3
+    num_modes = 5
+    # num_modes = 1
     stat_count = 15
     results = np.zeros((num_m_mat * num_n_mat * num_k_mat *
                         num_modes, 3 + stat_count), dtype=np.int64)
@@ -115,12 +116,12 @@ def iterate_over_matrix_sizes(mat_m_start: np.int64, mat_m_end: np.int64,
                  'L3-MISSES', 'DTLB-LOADS', 'DTLB-LOAD-MISSES', 'ITLB-LOADS', 'ITLB-LOAD-MISSES', 'PAGE-FAULTS', 'MINOR-FAULTS', 'MAJOR-FAULTS']
     df = pd.DataFrame(data=results, columns=col_names)
     df = df.replace(-1, np.nan)
-    modes_list = ['MARLIN', 'Intel MKL', 'oneDNN']
+    modes_list = ['MARLIN', 'Intel MKL', 'oneDNN', 'JIT MKL', 'JIT LIBXSMM']
     # modes_list = ['MARLIN']
     df.index.name = 'IDX'
     df.insert(3, 'MODE', np.tile(np.asarray(modes_list, dtype=np.object),
                                  num_m_mat * num_n_mat * num_k_mat))
-    df.to_csv('build/results/stats_{0:}_{1:}_{2:}_{3:}_{4:}_{5:}_{6:}_{7:.2f}_{8:}.csv'.format
+    df.to_csv('build/results/_stats_{0:}_{1:}_{2:}_{3:}_{4:}_{5:}_{6:}_{7:.2f}_{8:}.csv'.format
               (mat_m_start, mat_m_end, mat_m_inc, mat_n_start, mat_n_end, mat_n_inc, k,  sparsity, iterations))
 
 
