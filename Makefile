@@ -37,6 +37,7 @@ LINE_COLOR           = \033[0;33m
 CMD_COLOR            = \033[1;32m
 RESET_COLOR          = \033[0m
 DANGER_COLOR         = \033[1;91m
+ENABLE_EXT          ?= 0
 
 
 TEST_DIRS = $(sort $(dir $(wildcard test/*/*)))
@@ -52,9 +53,13 @@ EXT_OBJ = benchmark.o main.o
 PERF_OBJ = main.o
 
 DEPS = $(IDIR) $(wildcard $(IDIR)/*/*.h) $(wildcard $(IDIR)/*/*/*.h) $(LIBXSMM_INC_DIR) 
-INC = -I $(IDIR) -I $(GOOGLE_TEST)/$(GOOGLE_TEST)/include -I $(LIBXSMM_INC_DIR) 
+ifeq (0,$(ENABLE_EXT))
+	INC = -I $(IDIR) -I $(GOOGLE_TEST)/$(GOOGLE_TEST)/include
+else
+	INC = -I $(IDIR) -I $(GOOGLE_TEST)/$(GOOGLE_TEST)/include -I $(LIBXSMM_INC_DIR) -I $(MKL_INC_DIR) -I $(ONEDNN_INC_DIR) -I ${ONEDNN_CFG_INC_DIR} -I ${EIGEN_INC_DIR}
+endif
 MKL_LINK_ADVISOR=-Wl,--no-as-needed -lmkl_intel_ilp64 -lmkl_sequential -lmkl_core -lpthread -lm -ldl
-EXT_INC = -I $(ONEDNN_INC_DIR) -I ${ONEDNN_CFG_INC_DIR} -I $(MKL_INC_DIR) -I ${EIGEN_INC_DIR} 
+EXT_INC = -I $(ONEDNN_INC_DIR) -I ${ONEDNN_CFG_INC_DIR} -I $(MKL_INC_DIR) -I ${EIGEN_INC_DIR}
 LIBS =	-L $(BUILD_DIR)/$(GOOGLE_TEST)/lib -lgtest -lpthread -lm -ldl
 EXT_LIBS = -L $(MKL_LIB_DIR) -L $(LIBXSMM_LIB_DIR) -L $(ONEDNN_LIB_DIR) -ldnnl -lxsmm $(MKL_LINK_ADVISOR)
 
@@ -79,7 +84,7 @@ $(ODIR)/%.o: %.s $(DEPS)
 $(ODIR)/%.o: %.cc $(DEPS)
 	@echo "${LINE_COLOR}building object: $@${RESET_COLOR}"
 	@echo -n "${CMD_COLOR}"
-	$(CC) -c -o $@ $< $(CFLAGS) $(INC) $(EXT_INC)
+	$(CC) -c -o $@ $< $(CFLAGS) $(INC) -DENABLE_EXT=$(ENABLE_EXT)
 	@echo "${RESET_COLOR}"
 
 $(GOOGLE_TEST):
@@ -98,7 +103,7 @@ $(OUT_DIR):
 $(TEST_TARGET): $(TEST_OBJ_WITH_PATH) $(ASM_OBJ_WITH_PATH)
 	@echo "${LINE_COLOR}building executable: $@${RESET_COLOR}"
 	@echo -n "${CMD_COLOR}"
-	$(CC) -o $(BUILD_DIR)/$@ $^ $(TEST_FLAGS) $(LIBS) $(EXT_LIBS)
+	$(CC) -o $(BUILD_DIR)/$@ $^ $(TEST_FLAGS) $(LIBS)
 	@echo "${RESET_COLOR}"
 
 $(EXT_TARGET): $(ASM_OBJ_WITH_PATH) $(EXT_OBJ_WITH_PATH)
