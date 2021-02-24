@@ -12,7 +12,9 @@ MARLIN is a library with JIT (Just-in-time) compilation support to optimize perf
 <a name="getting-started"></a><a name="hello-libxsmm"></a>**Getting Started**: The following C++ code is an example of how the library can be used. `A`, `B`, `C` are three float matrices and `B` matrix is constant. Thus, matrix `B` can be converted using our JIT API and subsequently the sgemm function can be invoked.
 
 ```cpp
+#include <cstdlib>
 #include <marlin>
+#include <memory>
 
 using namespace MARLIN;
 
