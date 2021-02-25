@@ -1,0 +1,25 @@
+name: C/C++ CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: init git submodules
+      run: git submodule init
+    - name: update git submodules
+      run: git submodule update
+    - name: make
+      run: make
+    - name: make test
+      run: make test
+    - name: run all tests
+      run: ./build/test
