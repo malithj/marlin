@@ -24,6 +24,10 @@ int main(int argc, char *argv[]) {
   setenv("CPP_MINIMUM_LOG_LEVEL", "5", 1);
   LOG_INFO("starting the test suite");
   testing::InitGoogleTest(&argc, argv);
+#ifndef __AVX512F__
+  std::cout << "AVX512F not available on the target architecture" << std::endl;
+  return 0;
+#endif
   int result = RUN_ALL_TESTS();
   delete Env<void>::get_env();
   return result;
