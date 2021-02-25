@@ -78,3 +78,25 @@ make test
 ```
 
 ## External Benchmarks
+
+Inorder to test external benchmarks, the following variables in the makefile should be configured. The easiest way would be to build the respective libraries and export as environment variables. 
+
+```bash
+EIGEN_INC_DIR        = ${EIGEN_INC}
+LIBXSMM_LIB_DIR	     = ${LIBXSMM_LIB}
+LIBXSMM_INC_DIR	     = ${LIBXSMM_INC}
+MKL_LIB_DIR          = ${MKL_LIB}
+MKL_INC_DIR          = ${MKL_INC}
+OPENBLAS_INC_DIR.    = ${OPENBLAS_INC}
+OPENBLAS_CFG_INC_DIR = ${OPENBLAS_CFG_INC}
+OPENBLAS_LIB_DIR     = ${OPENBLAS_LIB}
+ONEDNN_CFG_INC_DIR   = ${ONEDNN_LIB}/../include
+ONEDNN_LIB_DIR       = ${ONEDNN_LIB}
+ONEDNN_INC_DIR       = ${ONEDNN_INC}
+```
+
+Having verified the external libraries, compile with external support by using the following command. 
+
+```bash
+make ext ENABLE_EXT=1
+```
