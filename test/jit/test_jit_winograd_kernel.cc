@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) Malith Jayaweera - All rights reserved.                       *
+ * This file is part of the MARLIN library.                                    *
+ *                                                                             *
+ * For information on the license, see the LICENSE file.                       *
+ * Further information: https://github.com/malithj/marlin/                     *
+ * SPDX-License-Identifier: BSD-3-Clause                                       *
+ ******************************************************************************/
+/* Malith Jayaweera
+*******************************************************************************/
 #include "conv/winograd/asm_wino.h"
 #include "gtest/gtest.h"
 #include "jit/wino_jitter.h"
@@ -52,7 +62,7 @@ TEST(JIT, WinogradKernel) {
             "addq	$64, %%rax\n\t"
             "vmovaps %%zmm24, (%%rax)\n\t"
             :
-            : [ reg ] "m"(buffer_out)
+            : [reg] "m"(buffer_out)
             :);
 
         const float *b_ptr = b + tidx * b_stride + m * in_channels + c;
