@@ -47,6 +47,11 @@ int main(/*int argc, char* argv[]*/) {
 
   // perform sgemm
   sgemm('N', 'N', m, n, k, 1.0, A, k, B, n, 0, C, n, jitter);
+
+  // free
+  std::free(A);
+  std::free(B);
+  std::free(C);
 }
 ```
 
