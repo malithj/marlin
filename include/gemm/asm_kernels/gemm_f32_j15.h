@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) Malith Jayaweera - All rights reserved.                       *
+ * This file is part of the MARLIN library.                                    *
+ *                                                                             *
+ * For information on the license, see the LICENSE file.                       *
+ * Further information: https://github.com/malithj/marlin/                     *
+ * SPDX-License-Identifier: BSD-3-Clause                                       *
+ ******************************************************************************/
+/* Malith Jayaweera
+*******************************************************************************/
 #ifndef __GEMM_ASM_F32_J15_H_
 #define __GEMM_ASM_F32_J15_H_
 
@@ -106,11 +116,11 @@ inline index_t gemm_f32_j15(index_t k, float* a, float* c, void* p_addr,
         "vfmadd231ps %[azmm], %%zmm17, %%zmm15\n\t"  // z15 += z0 *
                                                      // z17
         ::[azmm] "v"(azmm0),
-        [ czmm0 ] "v"(czmm16), [ czmm1 ] "v"(czmm17), [ czmm2 ] "v"(czmm18),
-        [ czmm3 ] "v"(czmm19), [ czmm4 ] "v"(czmm20), [ czmm5 ] "v"(czmm21),
-        [ czmm6 ] "v"(czmm22), [ czmm7 ] "v"(czmm23), [ czmm8 ] "v"(czmm24),
-        [ czmm9 ] "v"(czmm25), [ czmm10 ] "v"(czmm26), [ czmm11 ] "v"(czmm27),
-        [ czmm12 ] "v"(czmm28), [ czmm13 ] "v"(czmm29), [ czmm14 ] "v"(czmm30));
+        [czmm0] "v"(czmm16), [czmm1] "v"(czmm17), [czmm2] "v"(czmm18),
+        [czmm3] "v"(czmm19), [czmm4] "v"(czmm20), [czmm5] "v"(czmm21),
+        [czmm6] "v"(czmm22), [czmm7] "v"(czmm23), [czmm8] "v"(czmm24),
+        [czmm9] "v"(czmm25), [czmm10] "v"(czmm26), [czmm11] "v"(czmm27),
+        [czmm12] "v"(czmm28), [czmm13] "v"(czmm29), [czmm14] "v"(czmm30));
 
     __asm__ __volatile__(
         "vmovaps %%zmm1, %[czmm0]\n\t"
@@ -128,13 +138,11 @@ inline index_t gemm_f32_j15(index_t k, float* a, float* c, void* p_addr,
         "vmovaps %%zmm13, %[czmm12]\n\t"
         "vmovaps %%zmm14, %[czmm13]\n\t"
         "vmovaps %%zmm15, %[czmm14]\n\t"
-        :
-        [ czmm0 ] "=v"(czmm16), [ czmm1 ] "=v"(czmm17), [ czmm2 ] "=v"(czmm18),
-        [ czmm3 ] "=v"(czmm19), [ czmm4 ] "=v"(czmm20), [ czmm5 ] "=v"(czmm21),
-        [ czmm6 ] "=v"(czmm22), [ czmm7 ] "=v"(czmm23), [ czmm8 ] "=v"(czmm24),
-        [ czmm9 ] "=v"(czmm25), [ czmm10 ] "=v"(czmm26),
-        [ czmm11 ] "=v"(czmm27), [ czmm12 ] "=v"(czmm28),
-        [ czmm13 ] "=v"(czmm29), [ czmm14 ] "=v"(czmm30)
+        : [czmm0] "=v"(czmm16), [czmm1] "=v"(czmm17), [czmm2] "=v"(czmm18),
+          [czmm3] "=v"(czmm19), [czmm4] "=v"(czmm20), [czmm5] "=v"(czmm21),
+          [czmm6] "=v"(czmm22), [czmm7] "=v"(czmm23), [czmm8] "=v"(czmm24),
+          [czmm9] "=v"(czmm25), [czmm10] "=v"(czmm26), [czmm11] "=v"(czmm27),
+          [czmm12] "=v"(czmm28), [czmm13] "=v"(czmm29), [czmm14] "=v"(czmm30)
         :
         :);
   }

@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) Malith Jayaweera - All rights reserved.                       *
+ * This file is part of the MARLIN library.                                    *
+ *                                                                             *
+ * For information on the license, see the LICENSE file.                       *
+ * Further information: https://github.com/malithj/marlin/                     *
+ * SPDX-License-Identifier: BSD-3-Clause                                       *
+ ******************************************************************************/
+/* Malith Jayaweera
+*******************************************************************************/
 #	Assemble revision 001 of GEMM
 #	16:12 AUGUST 01, 2020
 #   @author: Malith Jayaweera
