@@ -31,7 +31,7 @@ int main(/*int argc, char* argv[]*/) {
   for (index_t i = 0; i < m; ++i) {
     for (index_t j = 0; j < k; ++j) {
       index_t idx = i * k + j;
-      A[i * k + j] = i * k + j + 1;
+      A[i * k + j] = idx + 1;
     }
   }
   for (index_t i = 0; i < k; ++i) {
