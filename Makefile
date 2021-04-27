@@ -71,68 +71,68 @@ PERF_OBJ_WITH_PATH = $(patsubst %,$(ODIR)/perf/%,$(PERF_OBJ))
 WIN_PERF_OBJ_WITH_PATH = $(patsubst %,$(ODIR)/win_perf/%,$(PERF_OBJ))
 
 all: $(OUT_DIR) $(GOOGLE_TEST) $(TARGET)
-	@echo -n "${CMD_COLOR}"
-	@echo "${LINE_COLOR}Finished building target: $^${RESET_COLOR}" 
-	@echo "${RESET_COLOR}"
+	@echo -ne "${CMD_COLOR}"
+	@echo -e "${LINE_COLOR}Finished building target: $^${RESET_COLOR}" 
+	@echo -e "${RESET_COLOR}"
 
 $(ODIR)/%.o: %.s $(DEPS)
-	@echo "${LINE_COLOR}building object: $@${RESET_COLOR}"
-	@echo -n "${CMD_COLOR}"
+	@echo -ne "${LINE_COLOR}building object: $@${RESET_COLOR}"
+	@echo -ne "${CMD_COLOR}"
 	$(CC) -c -o $@ $< $(CFLAGS) $(INC)
-	@echo "${RESET_COLOR}"
+	@echo -e "${RESET_COLOR}"
 
 $(ODIR)/%.o: %.cc $(DEPS)
-	@echo "${LINE_COLOR}building object: $@${RESET_COLOR}"
-	@echo -n "${CMD_COLOR}"
+	@echo -e "${LINE_COLOR}building object: $@${RESET_COLOR}"
+	@echo -ne "${CMD_COLOR}"
 	$(CC) -c -o $@ $< $(CFLAGS) $(INC) -DENABLE_EXT=$(ENABLE_EXT)
-	@echo "${RESET_COLOR}"
+	@echo -e "${RESET_COLOR}"
 
 $(GOOGLE_TEST):
-	@echo "${LINE_COLOR}Building object file: $@${RESET_COLOR}"
-	@echo -n "${CMD_COLOR}"
+	@echo -e "${LINE_COLOR}Building object file: $@${RESET_COLOR}"
+	@echo -ne "${CMD_COLOR}"
 	@cd $(BUILD_DIR)/$(GOOGLE_TEST) && cmake ../../$(GOOGLE_TEST) && make
-	@echo "${RESET_COLOR}"
+	@echo -e "${RESET_COLOR}"
 
 $(OUT_DIR):
-	@echo "${LINE_COLOR}Creating directory: $(OUR_DIR)${RESET_COLOR}"
-	@echo -n "${CMD_COLOR}"
+	@echo -e "${LINE_COLOR}Creating directory: $(OUR_DIR)${RESET_COLOR}"
+	@echo -ne "${CMD_COLOR}"
 	${MKDIR_P} ${OUT_DIR}
 	${MKDIR_P} ${MODULES}
-	@echo "${RESET_COLOR}"
+	@echo -e "${RESET_COLOR}"
 
 $(TEST_TARGET): $(TEST_OBJ_WITH_PATH) $(ASM_OBJ_WITH_PATH)
-	@echo "${LINE_COLOR}building executable: $@${RESET_COLOR}"
-	@echo -n "${CMD_COLOR}"
+	@echo -e "${LINE_COLOR}building executable: $@${RESET_COLOR}"
+	@echo -ne "${CMD_COLOR}"
 	$(CC) -o $(BUILD_DIR)/$@ $^ $(TEST_FLAGS) $(LIBS)
-	@echo "${RESET_COLOR}"
+	@echo -e "${RESET_COLOR}"
 
 $(EXT_TARGET): $(ASM_OBJ_WITH_PATH) $(EXT_OBJ_WITH_PATH)
-	@echo "${LINE_COLOR}building executable: $@${RESET_COLOR}"
-	@echo -n "${CMD_COLOR}"
+	@echo -e "${LINE_COLOR}building executable: $@${RESET_COLOR}"
+	@echo -ne "${CMD_COLOR}"
 	$(CC) -o $(BUILD_DIR)/$@ $^ $(CFLAGS) $(LIBS) $(EXT_LIBS)
-	@echo "${RESET_COLOR}"
+	@echo -e "${RESET_COLOR}"
 
 $(PERF_TARGET): $(ASM_OBJ_WITH_PATH) $(PERF_OBJ_WITH_PATH)
-	@echo "${LINE_COLOR}building executable: $@${RESET_COLOR}"
-	@echo -n "${CMD_COLOR}"
+	@echo -e "${LINE_COLOR}building executable: $@${RESET_COLOR}"
+	@echo -ne "${CMD_COLOR}"
 	$(CC) -o $(BUILD_DIR)/$@ $^ $(CFLAGS) $(LIBS) $(EXT_LIBS)
-	@echo "${RESET_COLOR}"
+	@echo -e "${RESET_COLOR}"
 
 $(WIN_PERF_TARGET): $(ASM_OBJ_WITH_PATH) $(WIN_PERF_OBJ_WITH_PATH)
-	@echo "${LINE_COLOR}building executable: $@${RESET_COLOR}"
-	@echo -n "${CMD_COLOR}"
+	@echo -e "${LINE_COLOR}building executable: $@${RESET_COLOR}"
+	@echo -ne "${CMD_COLOR}"
 	$(CC) -o $(BUILD_DIR)/$@ $^ $(CFLAGS) $(LIBS) $(EXT_LIBS)
-	@echo "${RESET_COLOR}"
+	@echo -e "${RESET_COLOR}"
 
 $(TARGET): $(ASM_OBJ_WITH_PATH)
-	@echo "${LINE_COLOR}Building library $@ packaging $^${RESET_COLOR}"	
-	@echo -n "${CMD_COLOR}"
+	@echo -ne "${LINE_COLOR}Building library $@ packaging $^${RESET_COLOR}"	
+	@echo -ne "${CMD_COLOR}"
 	$(CC) -shared -o $(BUILD_DIR)/$@.so $^ $(LIB_FLAGS) -I $(INCLUDE_DIR)
 
 .PHONY: clean googletest
 
 clean:
-	@echo -n "${DANGER_COLOR}"
+	@echo -ne "${DANGER_COLOR}"
 	rm -f $(BUILD_DIR)/*~ $(BUILD_DIR)/$(TARGET) $(BUILD_DIR)/$(TEST_TARGET) $(BUILD_DIR)/$(EXT_TARGET) $(BUILD_DIR)/$(PERF_TARGET)
 	find $(ODIR) -type f -name '*.o' -delete
-	@echo -n "${RESET_COLOR}"
+	@echo -ne "${RESET_COLOR}"
